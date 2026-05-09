@@ -1,6 +1,6 @@
 # GitHub Projects (organization workflow)
 
-This repository participates in **zyx-corporation** GitHub **Projects** together with [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec) and [`kotonoha-management`](https://github.com/zyx-corporation/kotonoha-management).
+This repository participates in **zyx-corporation** GitHub **Projects** together with [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec), [`kotonoha-management`](https://github.com/zyx-corporation/kotonoha-management), and [`kotonoha-docs`](https://github.com/zyx-corporation/kotonoha-docs).
 
 ## For contributors
 

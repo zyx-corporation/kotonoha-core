@@ -20,6 +20,7 @@ Public cross-references only.
 | --- | --- |
 | [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec) | Canonical public specifications |
 | **kotonoha-core (this repository)** | OSS core implementation of SLS |
+| [`kotonoha-docs`](https://github.com/zyx-corporation/kotonoha-docs) | Non-specification public docs (manuals, tutorials, guides) |
 
 Whenever possible, changes here should track the specifications in [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec). Resolve open design questions through the public specification before locking behavior in code.
 

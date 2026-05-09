@@ -10,17 +10,18 @@
 - 開発者向けドキュメント、ビルド手順、コントリビューションに関する注記（コードベースの成長に合わせて拡充）
 - 仕様書とは切り分け、コードと一体で扱う実装上のメモ
 
-規範となる公開仕様は [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec) に置きます。非公開の設計探索やプロジェクト資料は [`kotonoha-project`](https://github.com/zyx-corporation/kotonoha-project) に留めます。
+規範となる公開仕様は [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec) に置きます。本リポジトリは、それらの仕様に基づくコードと開発者向け成果物を中心に扱います。
 
 ## 関連リポジトリ
 
+公開リポジトリ同士の参照のみ記載します。
+
 | リポジトリ | 役割 |
 | --- | --- |
-| [`kotonoha-project`](https://github.com/zyx-corporation/kotonoha-project) | 非公開のプロジェクト文書・設計検討 |
 | [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec) | 公開仕様の正本 |
 | **kotonoha-core（本リポジトリ）** | SLS の OSS コア実装 |
 
-可能な限り、実装の変更は [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec) の仕様と整合させます。設計論点が未解決の場合は、`kotonoha-project` と仕様側で整理してからコードの振る舞いを固定します。
+可能な限り、実装の変更は [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec) の仕様と整合させます。設計論点が未解決の場合は、公開仕様の側で整理してからコードの振る舞いを固定します。
 
 ## 言語について
 

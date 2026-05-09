@@ -10,17 +10,18 @@
 - Developer documentation, build instructions, and contribution notes (as the codebase grows)
 - Implementation notes that belong with the code, distinct from normative public specs
 
-Normative, review-facing specifications live in [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec). Non-public design exploration and internal project material remain in [`kotonoha-project`](https://github.com/zyx-corporation/kotonoha-project).
+Normative, review-facing specifications live in [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec). This repository focuses on code and developer-facing artifacts that implement those specifications.
 
 ## Related repositories
 
+Public cross-references only.
+
 | Repository | Role |
 | --- | --- |
-| [`kotonoha-project`](https://github.com/zyx-corporation/kotonoha-project) | Non-public project documents and design exploration |
 | [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec) | Canonical public specifications |
 | **kotonoha-core (this repository)** | OSS core implementation of SLS |
 
-Whenever possible, changes here should track the specifications in [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec). If a design point is still unresolved, work it through `kotonoha-project` and the spec before locking behavior in code.
+Whenever possible, changes here should track the specifications in [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec). Resolve open design questions through the public specification before locking behavior in code.
 
 ## Language policy
 

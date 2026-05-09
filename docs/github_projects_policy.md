@@ -2,13 +2,11 @@
 
 This repository participates in **zyx-corporation** GitHub **Projects** together with [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec) and [`kotonoha-project`](https://github.com/zyx-corporation/kotonoha-project).
 
-The maintainer-facing rule set defines the **primary shared board** as the GitHub Project **linked to the [`kotonoha-project`](https://github.com/zyx-corporation/kotonoha-project) repository** (not a separate organization-owned Project used as the sole canonical board).
-
 ## For contributors
 
 - Use **GitHub Issues** for bugs and feature work; use **Pull Requests** for code and developer-facing docs.
 - **Completion criteria** live in the Issue and PR bodies (and merged commits), not only in a board column.
-- Maintainers may mirror progress on that shared Project (status, priority). If an Item is marked **Done** on a board, the linked Issue should reflect the same outcome (typically after the PR is merged).
+- Maintainers may mirror progress on shared Organization Projects (status, priority). If an Item is marked **Done** on a board, the linked Issue should reflect the same outcome (typically after the PR is merged).
 
 ## Language
 

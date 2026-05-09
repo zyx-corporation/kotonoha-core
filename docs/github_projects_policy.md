@@ -1,6 +1,6 @@
 # GitHub Projects (organization workflow)
 
-This repository participates in **zyx-corporation** GitHub **Projects** together with [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec) and [`kotonoha-project`](https://github.com/zyx-corporation/kotonoha-project).
+This repository participates in **zyx-corporation** GitHub **Projects** together with [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec) and [`kotonoha-management`](https://github.com/zyx-corporation/kotonoha-management).
 
 ## For contributors
 
@@ -16,4 +16,4 @@ Issues and PRs in this repository follow the repository **English-first** policy
 
 Behavior-changing work should reference the relevant sections or PRs in [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec) when possible.
 
-For maintainer-only operational detail (field definitions, triage rules), see internal governance in `kotonoha-project` (private).
+For maintainer-only operational detail (field definitions, triage rules), see internal governance in `kotonoha-management` (private).

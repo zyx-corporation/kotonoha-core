@@ -25,7 +25,7 @@ cargo test
 
 ### 永続化（デプロイメント）
 
-本番整合の中心ストアは **PostgreSQL 一本**とする（詳細は英語 [`docs/persistence.md`](docs/persistence.md)）。初期 DDL は [`migrations/001_init.sql`](migrations/001_init.sql)、ローカル用 [`docker-compose.yml`](docker-compose.yml) を参照。
+本番整合の中心ストアは **PostgreSQL 一本**とする（詳細は英語 [`docs/persistence.md`](docs/persistence.md)）。初期 DDL は [`migrations/20260510000000_v0_init.sql`](migrations/20260510000000_v0_init.sql)、ローカル用 [`docker-compose.yml`](docker-compose.yml) を参照。Rust からは Cargo 機能 **`postgres`** で [`store::postgres`](src/store/postgres.rs)（マイグレーション・検証済み INSERT）が利用可能。
 
 ## 関連リポジトリ
 

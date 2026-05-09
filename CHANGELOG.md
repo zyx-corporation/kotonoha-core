@@ -6,9 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.2] — 2026-05-10
+
 ### Added
 
-- PostgreSQL **`migrations/001_init.sql`** (`lineage_units`, `rde_documents`, `audit_events`), [`docs/postgresql-schema-v0.md`](docs/postgresql-schema-v0.md), [`docker-compose.yml`](docker-compose.yml), [`migrations/README.md`](migrations/README.md).
+- PostgreSQL DDL **`migrations/20260510000000_v0_init.sql`** (`lineage_units`, `rde_documents`, `audit_events`), [`docs/postgresql-schema-v0.md`](docs/postgresql-schema-v0.md), [`docker-compose.yml`](docker-compose.yml), [`migrations/README.md`](migrations/README.md).
+- Optional Cargo feature **`postgres`**: [`store::postgres`](src/store/postgres.rs) (`PgStore`) — SQLx pool, `Migrator`-based migrations from `migrations/`, `insert_lineage_unit`, `insert_rde_document_json` (strict RDE validation before insert), `insert_audit_event`.
 
 ### Documentation
 

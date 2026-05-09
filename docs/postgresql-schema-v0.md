@@ -1,6 +1,6 @@
 # PostgreSQL schema notes (v0)
 
-Experimental DDL lives in [`migrations/001_init.sql`](../migrations/001_init.sql). **Not normative** in [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec).
+Experimental DDL lives in [`migrations/20260510000000_v0_init.sql`](../migrations/20260510000000_v0_init.sql). **Not normative** in [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec).
 
 ## Tables
 

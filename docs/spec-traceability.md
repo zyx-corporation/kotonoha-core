@@ -12,5 +12,12 @@ This document maps **`kotonoha-core`** Rust modules to [`kotonoha-spec`](https:/
 
 ## Deferred (later Phase 2+ increments)
 
-- Persistent storage / audit log adapters ([`audit-trail-relationship.md`](https://github.com/zyx-corporation/kotonoha-spec/blob/main/docs/audit-trail-relationship.md)) — **target store: PostgreSQL** (see [`persistence.md`](persistence.md); DDL sketch [`migrations/001_init.sql`](../migrations/001_init.sql)).
 - Richer lineage graph types beyond minimal `LineageUnit`.
+
+### Persistence (PostgreSQL)
+
+| Concern | Rust module |
+| --- | --- |
+| [`audit-trail-relationship.md`](https://github.com/zyx-corporation/kotonoha-spec/blob/main/docs/audit-trail-relationship.md) (abstract audit correlation) | [`src/store/postgres.rs`](../src/store/postgres.rs) — optional feature **`postgres`**: pool, migrations, append-only `audit_events`, validated `rde_documents` / `lineage_units` inserts |
+
+DDL sketch: [`migrations/20260510000000_v0_init.sql`](../migrations/20260510000000_v0_init.sql); direction: [`persistence.md`](persistence.md).

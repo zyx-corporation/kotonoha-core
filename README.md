@@ -18,6 +18,7 @@ Rust crate **`kotonoha_core`** (`Cargo.toml`):
 - **`lineage::LineageUnit`** — minimal lineage unit (`docs/semantic-lineage-model.md`).
 - **`rde::validate_json`** — Phase 1 RDE interchange validation (`docs/rde-review-output.md`).
 - **`interchange::validate_interchange_json`** — optional envelope combining lineage and/or RDE JSON for tool pipelines (format `kotonoha.interchange.v1`; not part of normative `kotonoha-spec`).
+- **`store::postgres`** (Cargo feature **`postgres`**) — SQLx connection pool, filesystem migrations, and validated inserts into `lineage_units`, `rde_documents`, and `audit_events`.
 - Constant **`TARGET_SPEC_BUNDLE`** (`0.1`) — must match interchange `spec_version`.
 
 ### Build
@@ -37,7 +38,7 @@ Production-oriented storage targets **PostgreSQL** as the single primary databas
 ```bash
 docker compose up -d
 export DATABASE_URL="postgres://kotonoha:kotonoha@localhost:5432/kotonoha_dev"
-psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f migrations/001_init.sql
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f migrations/20260510000000_v0_init.sql
 ```
 
 See [`migrations/README.md`](migrations/README.md).

@@ -16,7 +16,7 @@ See [`spec-traceability.md`](spec-traceability.md) for mapping Rust modules to s
 
 Initial DDL and column notes:
 
-- [`migrations/001_init.sql`](../migrations/001_init.sql)
+- [`migrations/20260510000000_v0_init.sql`](../migrations/20260510000000_v0_init.sql)
 - [`docs/postgresql-schema-v0.md`](postgresql-schema-v0.md)
 - Local database: [`docker-compose.yml`](../docker-compose.yml) + [`migrations/README.md`](../migrations/README.md)
 
@@ -27,4 +27,5 @@ Initial DDL and column notes:
 | Date | Change |
 | --- | --- |
 | 2026-05-10 | Record PostgreSQL-as-primary decision (project governance; mirrors internal decision doc). |
-| 2026-05-10 | Add `001_init.sql`, schema notes, `docker-compose.yml`. |
+| 2026-05-10 | Add initial DDL (`20260510000000_v0_init.sql`), schema notes, `docker-compose.yml`. |
+| 2026-05-10 | Optional Rust adapter: `kotonoha_core` feature **`postgres`** (`store::postgres`), migrations + validated inserts. |

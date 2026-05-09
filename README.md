@@ -6,11 +6,26 @@
 
 ## Scope
 
-- Core libraries and runtime components for SLS
-- Developer documentation, build instructions, and contribution notes (as the codebase grows)
-- Implementation notes that belong with the code, distinct from normative public specs
+- Core libraries and runtime components for SLS (Phase 2 onward).
+- Developer documentation, build instructions, and contribution notes.
 
-Normative, review-facing specifications live in [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec). This repository focuses on code and developer-facing artifacts that implement those specifications.
+Normative, review-facing specifications live in [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec). This repository implements those specifications; see **[spec traceability](docs/spec-traceability.md)** for section ↔ code mapping.
+
+### Phase 2 (current minimum)
+
+Rust crate **`kotonoha_core`** (`Cargo.toml`):
+
+- **`lineage::LineageUnit`** — minimal lineage unit (`docs/semantic-lineage-model.md`).
+- **`rde::validate_json`** — Phase 1 RDE interchange validation (`docs/rde-review-output.md`).
+- Constant **`TARGET_SPEC_BUNDLE`** (`0.1`) — must match interchange `spec_version`.
+
+### Build
+
+Requires [Rust](https://www.rust-lang.org/tools/install) stable (MSRV in `Cargo.toml`).
+
+```bash
+cargo test
+```
 
 ## Related repositories
 

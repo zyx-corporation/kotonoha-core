@@ -1,0 +1,13 @@
+# Changelog
+
+All notable changes to this project are documented here.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [0.1.0] — 2026-05-10
+
+### Added
+
+- Phase 2 **minimum core library**: `kotonoha_core` crate with `lineage::LineageUnit` and `rde::validate_json` aligned to [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec) Phase 1 interchange.
+- [`docs/spec-traceability.md`](docs/spec-traceability.md).
+- CI (fmt, test).

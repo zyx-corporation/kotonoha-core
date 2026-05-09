@@ -6,11 +6,22 @@
 
 ## 範囲
 
-- SLS のコアライブラリおよび実行時コンポーネント
-- 開発者向けドキュメント、ビルド手順、コントリビューションに関する注記（コードベースの成長に合わせて拡充）
-- 仕様書とは切り分け、コードと一体で扱う実装上のメモ
+- SLS のコアライブラリおよび実行時コンポーネント（Phase 2 以降）
+- 開発者向けドキュメント、ビルド手順、コントリビューションに関する注記
 
-規範となる公開仕様は [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec) に置きます。本リポジトリは、それらの仕様に基づくコードと開発者向け成果物を中心に扱います。
+規範となる公開仕様は [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec) に置きます。コードと仕様セクションの対応は **[仕様トレース（英語）](docs/spec-traceability.md)** を参照してください。
+
+### Phase 2（現状の最小構成）
+
+Rust クレート **`kotonoha_core`**：`lineage::LineageUnit`、`rde::validate_json`、`TARGET_SPEC_BUNDLE`（詳細は [README.md](README.md)）。
+
+### ビルド
+
+[Rust](https://www.rust-lang.org/tools/install) が必要です。
+
+```bash
+cargo test
+```
 
 ## 関連リポジトリ
 

@@ -25,7 +25,7 @@ cargo test
 
 ### 永続化（デプロイメント）
 
-本番整合の中心ストアは **PostgreSQL 一本**とする（詳細は英語 [`docs/persistence.md`](docs/persistence.md)）。
+本番整合の中心ストアは **PostgreSQL 一本**とする（詳細は英語 [`docs/persistence.md`](docs/persistence.md)）。初期 DDL は [`migrations/001_init.sql`](migrations/001_init.sql)、ローカル用 [`docker-compose.yml`](docker-compose.yml) を参照。
 
 ## 関連リポジトリ
 

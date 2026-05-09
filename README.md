@@ -32,6 +32,16 @@ cargo test
 
 Production-oriented storage targets **PostgreSQL** as the single primary database — see [`docs/persistence.md`](docs/persistence.md).
 
+**Local PostgreSQL (development)**
+
+```bash
+docker compose up -d
+export DATABASE_URL="postgres://kotonoha:kotonoha@localhost:5432/kotonoha_dev"
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f migrations/001_init.sql
+```
+
+See [`migrations/README.md`](migrations/README.md).
+
 ## Related repositories
 
 Public cross-references only.

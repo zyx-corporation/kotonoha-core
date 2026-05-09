@@ -12,6 +12,14 @@ This repository implements **Kotonoha / SLS** behaviour. **Deployment persistenc
 
 See [`spec-traceability.md`](spec-traceability.md) for mapping Rust modules to specification sections. Persistence adapters will be listed there when introduced.
 
+## Schema sketch (v0)
+
+Initial DDL and column notes:
+
+- [`migrations/001_init.sql`](../migrations/001_init.sql)
+- [`docs/postgresql-schema-v0.md`](postgresql-schema-v0.md)
+- Local database: [`docker-compose.yml`](../docker-compose.yml) + [`migrations/README.md`](../migrations/README.md)
+
 ---
 
 ## Changelog
@@ -19,3 +27,4 @@ See [`spec-traceability.md`](spec-traceability.md) for mapping Rust modules to s
 | Date | Change |
 | --- | --- |
 | 2026-05-10 | Record PostgreSQL-as-primary decision (project governance; mirrors internal decision doc). |
+| 2026-05-10 | Add `001_init.sql`, schema notes, `docker-compose.yml`. |

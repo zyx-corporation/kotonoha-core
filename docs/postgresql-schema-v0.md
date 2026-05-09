@@ -30,8 +30,18 @@ Append-only style table for correlation with RDE / lineage ([`audit-trail-relati
 | --- | --- |
 | `correlation_ref` | Typically aligns with `subject_ref` or deployment-defined IDs. |
 
+### `interchange_documents`
+
+Stores one JSON document per row: the full core **interchange envelope** (`format` = `kotonoha.interchange.v1`). Introduced in [`migrations/20260510120000_v0_interchange_documents.sql`](../migrations/20260510120000_v0_interchange_documents.sql). Not normative in [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec); validated in Rust via [`interchange::validate_interchange_json`](https://github.com/zyx-corporation/kotonoha-core/blob/main/src/interchange.rs) before insert.
+
+| Column | Notes |
+| --- | --- |
+| `payload` | JSONB; entire envelope (may embed `lineage_unit` and/or `rde_document`). Gin index for containment queries. |
+
+Denormalized copies of lineage / RDE may still be stored separately in `lineage_units` / `rde_documents` when deployments want direct querying; this table preserves the **exact interchange artifact** as exchanged.
+
 ## Future increments
 
-- Interchange envelope (`kotonoha.interchange.v1`) as a dedicated table or view over `lineage_units` + `rde_documents`.
+- Materialized views or triggers linking `interchange_documents.payload` to `lineage_units` / `rde_documents`.
 - Multi-tenant partition keys.
 - Immutability triggers on `audit_events`.

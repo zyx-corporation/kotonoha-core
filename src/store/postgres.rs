@@ -1,4 +1,4 @@
-//! PostgreSQL pool, migrations, and inserts validated via [`crate::rde`] / [`crate::lineage`].
+//! PostgreSQL pool, migrations, and inserts validated via [`crate::rde`], [`crate::lineage`], [`crate::interchange`].
 
 use std::path::Path;
 
@@ -6,6 +6,7 @@ use sqlx::postgres::{PgPool, PgPoolOptions};
 use sqlx::types::Json;
 use uuid::Uuid;
 
+use crate::interchange;
 use crate::lineage::{LineageUnit, LineageValidationError};
 use crate::rde;
 
@@ -19,6 +20,7 @@ pub struct PgStore {
 #[derive(Debug)]
 pub enum StoreError {
     RdeValidation(String),
+    InterchangeValidation(String),
     Lineage(LineageValidationError),
     Sql(sqlx::Error),
     Migrate(sqlx::migrate::MigrateError),
@@ -30,6 +32,7 @@ impl std::fmt::Display for StoreError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             StoreError::RdeValidation(s) => f.write_str(s),
+            StoreError::InterchangeValidation(s) => f.write_str(s),
             StoreError::Lineage(LineageValidationError::EmptyId) => {
                 f.write_str("lineage unit id must not be empty")
             }
@@ -121,6 +124,24 @@ impl PgStore {
         )
         .bind(subject_ref)
         .bind(spec_version)
+        .bind(Json(v))
+        .fetch_one(&self.pool)
+        .await?;
+        Ok(id)
+    }
+
+    /// Validates with [`interchange::validate_interchange_json`], then stores the full envelope JSON in `payload`.
+    pub async fn insert_interchange_document_json(
+        &self,
+        json: &str,
+        strict_rde: bool,
+    ) -> Result<Uuid, StoreError> {
+        interchange::validate_interchange_json(json, strict_rde)
+            .map_err(StoreError::InterchangeValidation)?;
+        let v: serde_json::Value = serde_json::from_str(json)?;
+        let id = sqlx::query_scalar::<_, Uuid>(
+            r#"INSERT INTO interchange_documents (payload) VALUES ($1::jsonb) RETURNING id"#,
+        )
         .bind(Json(v))
         .fetch_one(&self.pool)
         .await?;

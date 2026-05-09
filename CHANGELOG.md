@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.3] — 2026-05-10
+
+### Added
+
+- Migration **`migrations/20260510120000_v0_interchange_documents.sql`**: table `interchange_documents` (full `kotonoha.interchange.v1` envelope JSONB).
+- **`PgStore::insert_interchange_document_json`** — validates via [`interchange::validate_interchange_json`](src/interchange.rs), then inserts into `interchange_documents`.
+
+### Documentation
+
+- [`docs/postgresql-schema-v0.md`](docs/postgresql-schema-v0.md): `interchange_documents` column notes.
+
 ## [0.1.2] — 2026-05-10
 
 ### Added

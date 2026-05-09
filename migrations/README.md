@@ -11,7 +11,7 @@ export DATABASE_URL="postgres://kotonoha:kotonoha@localhost:5432/kotonoha_dev"
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f migrations/20260510000000_v0_init.sql
 ```
 
-From the **`kotonoha`** CLI (monorepo path dependency on `kotonoha-core` with feature `postgres`):
+From the **`kotonoha`** CLI (Git dependency on `kotonoha-core` with feature `postgres`):
 
 ```bash
 export DATABASE_URL="postgres://kotonoha:kotonoha@localhost:5432/kotonoha_dev"
@@ -25,5 +25,6 @@ Use a dedicated database user with least privilege in real deployments.
 | File | Purpose |
 | --- | --- |
 | `20260510000000_v0_init.sql` | Initial tables: `lineage_units`, `rde_documents`, `audit_events`. |
+| `20260510120000_v0_interchange_documents.sql` | Table `interchange_documents` (`kotonoha.interchange.v1` envelope JSONB). |
 
 See [`docs/postgresql-schema-v0.md`](../docs/postgresql-schema-v0.md) for column semantics and spec references.

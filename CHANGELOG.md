@@ -4,6 +4,12 @@ All notable changes to this project are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Documentation
+
+- [`docs/persistence.md`](docs/persistence.md): PostgreSQL as the primary deployment database (project decision).
+
 ## [0.1.1] — 2026-05-10
 
 ### Added

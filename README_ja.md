@@ -23,6 +23,10 @@ Rust クレート **`kotonoha_core`**：`lineage::LineageUnit`、`rde::validate_
 cargo test
 ```
 
+### 永続化（デプロイメント）
+
+本番整合の中心ストアは **PostgreSQL 一本**とする（詳細は英語 [`docs/persistence.md`](docs/persistence.md)）。
+
 ## 関連リポジトリ
 
 公開リポジトリ同士の参照のみ記載します。

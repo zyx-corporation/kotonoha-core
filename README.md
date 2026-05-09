@@ -28,6 +28,10 @@ Requires [Rust](https://www.rust-lang.org/tools/install) stable (MSRV in `Cargo.
 cargo test
 ```
 
+### Persistence (deployments)
+
+Production-oriented storage targets **PostgreSQL** as the single primary database — see [`docs/persistence.md`](docs/persistence.md).
+
 ## Related repositories
 
 Public cross-references only.

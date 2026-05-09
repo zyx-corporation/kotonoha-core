@@ -13,7 +13,7 @@
 
 ### Phase 2（現状の最小構成）
 
-Rust クレート **`kotonoha_core`**：`lineage::LineageUnit`、`rde::validate_json`、`TARGET_SPEC_BUNDLE`（詳細は [README.md](README.md)）。
+Rust クレート **`kotonoha_core`**：`lineage::LineageUnit`、`rde::validate_json`、`interchange::validate_interchange_json`、`TARGET_SPEC_BUNDLE`（詳細は [README.md](README.md)）。
 
 ### ビルド
 

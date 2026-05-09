@@ -6,5 +6,6 @@
 /// [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec) bundle targeted by this crate release for interchange validation.
 pub const TARGET_SPEC_BUNDLE: &str = "0.1";
 
+pub mod interchange;
 pub mod lineage;
 pub mod rde;

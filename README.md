@@ -17,6 +17,7 @@ Rust crate **`kotonoha_core`** (`Cargo.toml`):
 
 - **`lineage::LineageUnit`** — minimal lineage unit (`docs/semantic-lineage-model.md`).
 - **`rde::validate_json`** — Phase 1 RDE interchange validation (`docs/rde-review-output.md`).
+- **`interchange::validate_interchange_json`** — optional envelope combining lineage and/or RDE JSON for tool pipelines (format `kotonoha.interchange.v1`; not part of normative `kotonoha-spec`).
 - Constant **`TARGET_SPEC_BUNDLE`** (`0.1`) — must match interchange `spec_version`.
 
 ### Build

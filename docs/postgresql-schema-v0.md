@@ -38,10 +38,10 @@ Stores one JSON document per row: the full core **interchange envelope** (`forma
 | --- | --- |
 | `payload` | JSONB; entire envelope (may embed `lineage_unit` and/or `rde_document`). Gin index for containment queries. |
 
-Denormalized copies of lineage / RDE may still be stored separately in `lineage_units` / `rde_documents` when deployments want direct querying; this table preserves the **exact interchange artifact** as exchanged.
+[`PgStore::insert_interchange_document_json`](https://github.com/zyx-corporation/kotonoha-core/blob/main/src/store/postgres.rs) stores the envelope here and, **in the same transaction**, inserts matching rows into **`lineage_units`** and **`rde_documents`** when the envelope includes `lineage_unit` and/or `rde_document`, so the canonical interchange artifact and query-friendly tables stay aligned.
 
 ## Future increments
 
-- Materialized views or triggers linking `interchange_documents.payload` to `lineage_units` / `rde_documents`.
+- Optional database triggers or materialized views **echoing** application-side materialization for reporting-only consumers.
 - Multi-tenant partition keys.
 - Immutability triggers on `audit_events`.

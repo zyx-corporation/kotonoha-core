@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.4] — 2026-05-10
+
+### Changed
+
+- **`PgStore::insert_interchange_document_json`**: one PostgreSQL **transaction** — insert into `interchange_documents`, then materialize optional `lineage_unit` / `rde_document` into `lineage_units` / `rde_documents` (same `strict_rde` as interchange validation for nested RDE).
+- **`PgStore::insert_rde_document_json`**: internal refactor (`insert_rde_document_value_ex`); behaviour unchanged (`strict` RDE validation remains **`true`**).
+
+### Documentation
+
+- [`docs/postgresql-schema-v0.md`](docs/postgresql-schema-v0.md): document transactional materialization.
+
 ## [0.1.3] — 2026-05-10
 
 ### Added

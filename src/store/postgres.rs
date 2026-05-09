@@ -2,11 +2,12 @@
 
 use std::path::Path;
 
-use sqlx::postgres::{PgPool, PgPoolOptions};
+use sqlx::postgres::{PgPool, PgPoolOptions, Postgres};
 use sqlx::types::Json;
+use sqlx::Executor;
 use uuid::Uuid;
 
-use crate::interchange;
+use crate::interchange::{self, InterchangeDocument};
 use crate::lineage::{LineageUnit, LineageValidationError};
 use crate::rde;
 
@@ -64,6 +65,58 @@ impl From<serde_json::Error> for StoreError {
     }
 }
 
+async fn insert_lineage_unit_ex<'e, E>(e: E, unit: &LineageUnit) -> Result<(), StoreError>
+where
+    E: Executor<'e, Database = Postgres>,
+{
+    unit.validate().map_err(StoreError::Lineage)?;
+    sqlx::query("INSERT INTO lineage_units (id, prior_unit_id) VALUES ($1, $2)")
+        .bind(&unit.id)
+        .bind(&unit.prior_unit_id)
+        .execute(e)
+        .await?;
+    Ok(())
+}
+
+async fn insert_rde_document_value_ex<'e, E>(
+    e: E,
+    document: serde_json::Value,
+    strict_rde: bool,
+) -> Result<Uuid, StoreError>
+where
+    E: Executor<'e, Database = Postgres>,
+{
+    let json = serde_json::to_string(&document)?;
+    rde::validate_json(&json, strict_rde).map_err(StoreError::RdeValidation)?;
+    let (subject_ref, spec_version) = {
+        let inner = document
+            .get("rde_review_output")
+            .ok_or(StoreError::MissingField("rde_review_output"))?;
+        let subject = inner
+            .get("subject_ref")
+            .and_then(|x| x.as_str())
+            .ok_or(StoreError::MissingField("subject_ref"))?
+            .to_string();
+        let spec = inner
+            .get("spec_version")
+            .and_then(|x| x.as_str())
+            .ok_or(StoreError::MissingField("spec_version"))?
+            .to_string();
+        (subject, spec)
+    };
+    let id = sqlx::query_scalar::<_, Uuid>(
+        r#"INSERT INTO rde_documents (subject_ref, spec_version, payload)
+           VALUES ($1, $2, $3::jsonb)
+           RETURNING id"#,
+    )
+    .bind(subject_ref)
+    .bind(spec_version)
+    .bind(Json(document))
+    .fetch_one(e)
+    .await?;
+    Ok(id)
+}
+
 impl PgStore {
     /// Opens a pool against `DATABASE_URL` (or any Postgres URL accepted by SQLx).
     pub async fn connect(database_url: &str) -> Result<Self, sqlx::Error> {
@@ -88,49 +141,19 @@ impl PgStore {
     /// Inserts a lineage row after [`LineageUnit::validate`]. Caller must order inserts so
     /// `prior_unit_id` references already-present rows when set.
     pub async fn insert_lineage_unit(&self, unit: &LineageUnit) -> Result<(), StoreError> {
-        unit.validate().map_err(StoreError::Lineage)?;
-        sqlx::query("INSERT INTO lineage_units (id, prior_unit_id) VALUES ($1, $2)")
-            .bind(&unit.id)
-            .bind(&unit.prior_unit_id)
-            .execute(&self.pool)
-            .await?;
-        Ok(())
+        insert_lineage_unit_ex(&self.pool, unit).await
     }
 
     /// Validates with [`rde::validate_json`] (`strict = true`), then stores the full document JSON in `payload`.
     pub async fn insert_rde_document_json(&self, json: &str) -> Result<Uuid, StoreError> {
-        rde::validate_json(json, true).map_err(StoreError::RdeValidation)?;
         let v: serde_json::Value = serde_json::from_str(json)?;
-        let (subject_ref, spec_version) = {
-            let inner = v
-                .get("rde_review_output")
-                .ok_or(StoreError::MissingField("rde_review_output"))?;
-            let subject = inner
-                .get("subject_ref")
-                .and_then(|x| x.as_str())
-                .ok_or(StoreError::MissingField("subject_ref"))?
-                .to_string();
-            let spec = inner
-                .get("spec_version")
-                .and_then(|x| x.as_str())
-                .ok_or(StoreError::MissingField("spec_version"))?
-                .to_string();
-            (subject, spec)
-        };
-        let id = sqlx::query_scalar::<_, Uuid>(
-            r#"INSERT INTO rde_documents (subject_ref, spec_version, payload)
-               VALUES ($1, $2, $3::jsonb)
-               RETURNING id"#,
-        )
-        .bind(subject_ref)
-        .bind(spec_version)
-        .bind(Json(v))
-        .fetch_one(&self.pool)
-        .await?;
-        Ok(id)
+        insert_rde_document_value_ex(&self.pool, v, true).await
     }
 
-    /// Validates with [`interchange::validate_interchange_json`], then stores the full envelope JSON in `payload`.
+    /// Validates with [`interchange::validate_interchange_json`], inserts the full envelope into
+    /// **`interchange_documents`**, then **in the same transaction** materializes optional
+    /// `lineage_unit` and `rde_document` into **`lineage_units`** and **`rde_documents`** when
+    /// present. Nested RDE uses the same `strict_rde` flag as interchange validation.
     pub async fn insert_interchange_document_json(
         &self,
         json: &str,
@@ -138,14 +161,28 @@ impl PgStore {
     ) -> Result<Uuid, StoreError> {
         interchange::validate_interchange_json(json, strict_rde)
             .map_err(StoreError::InterchangeValidation)?;
-        let v: serde_json::Value = serde_json::from_str(json)?;
-        let id = sqlx::query_scalar::<_, Uuid>(
+        let doc: InterchangeDocument = serde_json::from_str(json)?;
+        let envelope: serde_json::Value = serde_json::from_str(json)?;
+
+        let mut tx = self.pool.begin().await?;
+
+        let interchange_id = sqlx::query_scalar::<_, Uuid>(
             r#"INSERT INTO interchange_documents (payload) VALUES ($1::jsonb) RETURNING id"#,
         )
-        .bind(Json(v))
-        .fetch_one(&self.pool)
+        .bind(Json(envelope))
+        .fetch_one(&mut *tx)
         .await?;
-        Ok(id)
+
+        if let Some(ref u) = doc.lineage_unit {
+            insert_lineage_unit_ex(&mut *tx, u).await?;
+        }
+
+        if let Some(v) = doc.rde_document {
+            insert_rde_document_value_ex(&mut *tx, v, strict_rde).await?;
+        }
+
+        tx.commit().await?;
+        Ok(interchange_id)
     }
 
     /// Append-only audit row (`audit_events`).

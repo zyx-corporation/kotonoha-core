@@ -30,3 +30,4 @@ Initial DDL and column notes:
 | 2026-05-10 | Add initial DDL (`20260510000000_v0_init.sql`), schema notes, `docker-compose.yml`. |
 | 2026-05-10 | Optional Rust adapter: `kotonoha_core` feature **`postgres`** (`store::postgres`), migrations + validated inserts. |
 | 2026-05-10 | Migration **`20260510120000_v0_interchange_documents.sql`** and **`insert_interchange_document_json`** for `kotonoha.interchange.v1` envelopes. |
+| 2026-05-10 | **`insert_interchange_document_json`** materializes **`lineage_units`** / **`rde_documents`** in the **same transaction** as **`interchange_documents`**. |

@@ -19,6 +19,6 @@ This document maps **`kotonoha-core`** Rust modules to [`kotonoha-spec`](https:/
 | Concern | Rust module |
 | --- | --- |
 | [`audit-trail-relationship.md`](https://github.com/zyx-corporation/kotonoha-spec/blob/main/docs/audit-trail-relationship.md) (abstract audit correlation) | [`src/store/postgres.rs`](../src/store/postgres.rs) — optional feature **`postgres`**: pool, migrations, append-only `audit_events`, validated `rde_documents` / `lineage_units` inserts |
-| *(non-normative envelope persistence)* | Same — **`insert_interchange_document_json`** → table **`interchange_documents`** ([`interchange.rs`](../src/interchange.rs) validation rules) |
+| *(non-normative envelope persistence)* | Same — **`insert_interchange_document_json`** → **`interchange_documents`** plus optional **`lineage_units`** / **`rde_documents`** in one transaction ([`interchange.rs`](../src/interchange.rs) validation rules) |
 
 DDL sketches: [`migrations/`](../migrations/) — baseline [`20260510000000_v0_init.sql`](../migrations/20260510000000_v0_init.sql), interchange [`20260510120000_v0_interchange_documents.sql`](../migrations/20260510120000_v0_interchange_documents.sql); direction: [`persistence.md`](persistence.md).

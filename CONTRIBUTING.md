@@ -27,7 +27,7 @@ Without `DATABASE_URL`, ignored tests are skipped so `cargo test --features post
 
 ## Workflow
 
-Organization **Git/Issue/branch/PR** rules (**no direct edits to `main`**): **[`docs/git_operation_rules.md`](docs/git_operation_rules.md)** ([canonical in **`kotonoha-management`**](https://github.com/zyx-corporation/kotonoha-management/blob/main/docs/04_git_operation_rules.md); update canon first).
+Organization **Git/Issue/branch/PR** rules (**no direct edits to `main`**): **[`docs/git_operation_rules.md`](docs/git_operation_rules.md)** (Japanese; self-contained in this repo).
 
 1. Open an **Issue** for design questions that might affect the public specification (resolve in `kotonoha-spec` first when normative).
 2. **Pull requests** should include tests and traceability updates.

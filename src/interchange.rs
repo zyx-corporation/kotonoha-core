@@ -135,4 +135,97 @@ mod tests {
         .to_string();
         assert!(validate_interchange_json(&j, false).unwrap().is_empty());
     }
+
+    #[test]
+    fn rejects_wrong_envelope_format() {
+        let j = serde_json::json!({
+            "format": "kotonoha.interchange.v0",
+            "spec_bundle": crate::TARGET_SPEC_BUNDLE,
+            "lineage_unit": { "id": "https://example.invalid/l/x" }
+        })
+        .to_string();
+        let e = validate_interchange_json(&j, false).unwrap_err();
+        assert!(e.contains("format"), "expected format error, got {e:?}");
+    }
+
+    #[test]
+    fn rejects_wrong_spec_bundle_on_envelope() {
+        let j = serde_json::json!({
+            "format": INTERCHANGE_FORMAT_V1,
+            "spec_bundle": "0.2",
+            "lineage_unit": { "id": "https://example.invalid/l/x" }
+        })
+        .to_string();
+        let e = validate_interchange_json(&j, false).unwrap_err();
+        assert!(
+            e.contains("spec_bundle"),
+            "expected spec_bundle error, got {e:?}"
+        );
+    }
+
+    #[test]
+    fn rejects_invalid_json_syntax() {
+        assert!(validate_interchange_json("{ not json", false).is_err());
+    }
+
+    #[test]
+    fn rejects_whitespace_only_lineage_id() {
+        let j = serde_json::json!({
+            "format": INTERCHANGE_FORMAT_V1,
+            "spec_bundle": crate::TARGET_SPEC_BUNDLE,
+            "lineage_unit": { "id": "   ", "prior_unit_id": null }
+        })
+        .to_string();
+        assert!(validate_interchange_json(&j, false).is_err());
+    }
+
+    #[test]
+    fn rejects_rde_document_only_when_nested_spec_version_mismatch() {
+        let j = serde_json::json!({
+            "format": INTERCHANGE_FORMAT_V1,
+            "spec_bundle": crate::TARGET_SPEC_BUNDLE,
+            "rde_document": {
+                "rde_review_output": {
+                    "spec_version": "99.99",
+                    "subject_ref": "https://example.invalid/s",
+                    "categories": {
+                        "preserved": [],
+                        "transformed": [],
+                        "complemented": [],
+                        "intentionally_unresolved": [],
+                        "lost": [],
+                        "deviation_risk": [],
+                        "next_update_policy": []
+                    }
+                }
+            }
+        })
+        .to_string();
+        assert!(validate_interchange_json(&j, false).is_err());
+    }
+
+    #[test]
+    fn strict_nested_rde_fails_when_summary_missing_on_item() {
+        let j = serde_json::json!({
+            "format": INTERCHANGE_FORMAT_V1,
+            "spec_bundle": crate::TARGET_SPEC_BUNDLE,
+            "rde_document": {
+                "rde_review_output": {
+                    "spec_version": crate::TARGET_SPEC_BUNDLE,
+                    "subject_ref": "https://example.invalid/s",
+                    "categories": {
+                        "preserved": [{}],
+                        "transformed": [],
+                        "complemented": [],
+                        "intentionally_unresolved": [],
+                        "lost": [],
+                        "deviation_risk": [],
+                        "next_update_policy": []
+                    }
+                }
+            }
+        })
+        .to_string();
+        assert!(validate_interchange_json(&j, true).is_err());
+    }
 }

@@ -6,6 +6,10 @@ Sister-project **engineering RDE norms** adapted for organizational Japanese dra
 
 Update [`docs/spec-traceability.md`](docs/spec-traceability.md) when you add or change public API surface tied to the specification.
 
+## Design hygiene
+
+Use object-oriented **design patterns**—separation of concerns, explicit extension points, sane dependency direction—when they clearly improve **maintainability** or **efficiency**, not as naming ceremony. Prefer Rust-native structure (**traits**, **enums**, **composition**, small `mod` boundaries) over deep inheritance-style hierarchies. Avoid speculative layering that obscures interchange/RDE/traceability paths or fights the **`cargo test`** invariants documented in **`docs/unit_testing_guidelines.md`**; explain trade-offs under PR **ΔM** (see **[Awai `rde_development_guidelines`](https://github.com/zyx-corporation/awai-commons/blob/main/docs/engineering/rde_development_guidelines.md) §5**).
+
 ## Build & tests
 
 ```bash

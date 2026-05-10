@@ -32,6 +32,6 @@ Japanese guidance maintained in tandem with partner project drafts: **[`docs/uni
 
 ## Current inventory (snapshot 2026-05-11)
 
-- **nine** synchronous unit tests combined across **`lineage`**, **`rde`**, and **`interchange`** modules.
+- **twenty-three** synchronous library tests: **two** `lineage`, **nine** `interchange`, **twelve** `rde` (Negative-heavy envelope and RDE-shape guards per testing policy).
 - **two** ignored async PostgreSQL smoke tests gated on **`DATABASE_URL`** and **`postgres`** feature (`src/store/postgres.rs`).
 - **no** top-level **`tests/`** Rust integration binaries yet—optional Phase 3 harness per internal planning (**P3-3e** stresses keeping `cargo test` and Phase 2 acceptance scripts compatible).

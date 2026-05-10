@@ -178,4 +178,119 @@ mod tests {
         }"#;
         assert!(validate_json(j, true).is_err());
     }
+
+    #[test]
+    fn rejects_missing_rde_review_output() {
+        let j = r#"{"other":true}"#;
+        assert!(validate_json(j, false).is_err());
+    }
+
+    #[test]
+    fn rejects_rde_review_output_when_not_object() {
+        let j = r#"{"rde_review_output":[]}"#;
+        assert!(validate_json(j, false).is_err());
+    }
+
+    #[test]
+    fn rejects_missing_subject_ref() {
+        let j = r#"{
+            "rde_review_output": {
+                "spec_version": "0.1",
+                "categories": {
+                    "preserved": [],
+                    "transformed": [],
+                    "complemented": [],
+                    "intentionally_unresolved": [],
+                    "lost": [],
+                    "deviation_risk": [],
+                    "next_update_policy": []
+                }
+            }
+        }"#;
+        assert!(validate_json(j, false).is_err());
+    }
+
+    #[test]
+    fn rejects_empty_subject_ref_string() {
+        let j = r#"{
+            "rde_review_output": {
+                "spec_version": "0.1",
+                "subject_ref": "",
+                "categories": {
+                    "preserved": [],
+                    "transformed": [],
+                    "complemented": [],
+                    "intentionally_unresolved": [],
+                    "lost": [],
+                    "deviation_risk": [],
+                    "next_update_policy": []
+                }
+            }
+        }"#;
+        assert!(validate_json(j, false).is_err());
+    }
+
+    #[test]
+    fn rejects_missing_categories_object() {
+        let j = r#"{
+            "rde_review_output": {
+                "spec_version": "0.1",
+                "subject_ref": "https://example.invalid/x"
+            }
+        }"#;
+        assert!(validate_json(j, false).is_err());
+    }
+
+    #[test]
+    fn rejects_categories_when_not_object() {
+        let j = r#"{
+            "rde_review_output": {
+                "spec_version": "0.1",
+                "subject_ref": "https://example.invalid/x",
+                "categories": []
+            }
+        }"#;
+        assert!(validate_json(j, false).is_err());
+    }
+
+    #[test]
+    fn rejects_unknown_category_key() {
+        let j = r#"{
+            "rde_review_output": {
+                "spec_version": "0.1",
+                "subject_ref": "https://example.invalid/x",
+                "categories": {
+                    "preserved": [],
+                    "transformed": [],
+                    "complemented": [],
+                    "intentionally_unresolved": [],
+                    "lost": [],
+                    "deviation_risk": [],
+                    "next_update_policy": [],
+                    "extra_category": []
+                }
+            }
+        }"#;
+        assert!(validate_json(j, false).is_err());
+    }
+
+    #[test]
+    fn rejects_category_entry_when_not_array() {
+        let j = r#"{
+            "rde_review_output": {
+                "spec_version": "0.1",
+                "subject_ref": "https://example.invalid/x",
+                "categories": {
+                    "preserved": {},
+                    "transformed": [],
+                    "complemented": [],
+                    "intentionally_unresolved": [],
+                    "lost": [],
+                    "deviation_risk": [],
+                    "next_update_policy": []
+                }
+            }
+        }"#;
+        assert!(validate_json(j, false).is_err());
+    }
 }

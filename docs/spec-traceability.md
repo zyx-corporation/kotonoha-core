@@ -40,3 +40,6 @@ Work **not** required to declare Phase 2 minimal implementation complete:
 - **Richer lineage graph** types and queries beyond the minimal `LineageUnit` struct (multi-hop graphs, richer identities, etc.).
 - **Product-scale** audit pipelines, authorization, and operational policy beyond the DDL sketches—tracked against Phase 3+ gates in the phase plan.
 - **Persistence evolution** (new tables, replication, retention) beyond the Phase 2 DDL sketches—coordinate with `kotonoha-spec` and [`persistence.md`](persistence.md) before expanding normative claims.
+
+**Informative:** internal management outline **`docs/20` (core ⇄ console events)** versus current modules — [`core-console-contract-gap-phase3-draft.md`](core-console-contract-gap-phase3-draft.md).
+

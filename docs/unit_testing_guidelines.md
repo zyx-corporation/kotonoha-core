@@ -10,6 +10,22 @@ This repository distinguishes three layers:
 
 Behaviour relative to **`kotonoha-spec`** is tracked in [`spec-traceability.md`](spec-traceability.md). Do not widen normative meaning only through tests; resolve spec deltas in **`kotonoha-spec`** issues/PRs first when required.
 
+Related methodology (applied to Kotonoha in organizational Japanese drafts **§24 §§4–7** / doc **§25**): sibling project **[Awai `rde_testing_policy`](https://github.com/zyx-corporation/awai-commons/blob/main/docs/engineering/rde_testing_policy.md)**.
+
+---
+
+## Positive / Negative (semantic invariants)
+
+We adopt **[Awai’s Positive / Negative split](https://github.com/zyx-corporation/awai-commons/blob/main/docs/engineering/rde_testing_policy.md)**: **Positive** proves spec‑aligned validators and CLI-visible outcomes regress safely; **Negative** freezes **disallowed shapes** (bad `spec_version` / `spec_bundle`, empty envelopes, malformed RDE envelopes, etc.) so “flexible JSON” cannot silently become a norm expansion. Treat failing Negative suites as semantic drift risks, not only “bugs”.
+
+## TDD sequencing for risky changes
+
+For changes that resemble **cross-repo interchange / catalogue / DDL** edits, follow **[§5 of Awai `rde_development_guidelines`](https://github.com/zyx-corporation/awai-commons/blob/main/docs/engineering/rde_development_guidelines.md)**-style PR notes (ΔM / guards), mapped to organizational Japanese draft **§25**: prefer **Red → Green → Refactor**. When touching invariants **write or extend Negative assertions first**. If implementation landed ahead of tests, commit a failing repro first, then fix in a follow‑up commit. Keep unrelated ΔMs out of one PR where practical; state in the PR which drift each guard blocks.
+
+## CI vs scripted acceptance (“E2E-like”)
+
+**`cargo test` on CI** should keep agreed **reject / strict-regression paths** green without extra flags (`postgres`-gated **`#[ignore]`** jobs separately with `DATABASE_URL`). **Phase 2 gate‑level reassurance** stays with **[`phase2_acceptance_demo.sh`](https://github.com/zyx-corporation/kotonoha-cli/blob/main/scripts/phase2_acceptance_demo.sh)** and **`kotonoha-docs`** walkthrough (**do not** replace them with library tests alone). Browser/UI E2E is out of OSS gate scope today unless future milestones add harnesses.
+
 Japanese guidance maintained in tandem with partner project drafts: **[`docs/unit_testing_guidelines_ja.md`](unit_testing_guidelines_ja.md)**.
 
 ---

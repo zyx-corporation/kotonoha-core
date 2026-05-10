@@ -8,9 +8,7 @@
 
 **`kotonoha-core`** と周辺（**`kotonoha-cli`** 等）の **自動検証がどの層にあるか**、PR で何が期待されるかを、プロジェクト側で共通言語として揃える。normative は **`kotonoha-spec`** と開発フェーズ計画（クローン参加者の社内ワークスペースにおけるドラフト規程）により定められたフェーズゲートが優先する。
 
-関連（公開のみ）:[`spec-traceability.md`](spec-traceability.md)、[`Phase 2 CLI walkthrough`](https://github.com/zyx-corporation/kotonoha-docs/blob/main/docs/tutorials/phase2_cli_walkthrough.md)、[`phase2_acceptance_demo.sh`](https://github.com/zyx-corporation/kotonoha-cli/blob/main/scripts/phase2_acceptance_demo.sh)、[`CONTRIBUTING.md`](../CONTRIBUTING.md)
-
----
+関連（公開のみ）:[`spec-traceability.md`](spec-traceability.md)、[**Awai `rde_testing_policy`**](https://github.com/zyx-corporation/awai-commons/blob/main/docs/engineering/rde_testing_policy.md)、[**Awai `rde_development_guidelines`**](https://github.com/zyx-corporation/awai-commons/blob/main/docs/engineering/rde_development_guidelines.md)、[`Phase 2 CLI walkthrough`](https://github.com/zyx-corporation/kotonoha-docs/blob/main/docs/tutorials/phase2_cli_walkthrough.md)、[`phase2_acceptance_demo.sh`](https://github.com/zyx-corporation/kotonoha-cli/blob/main/scripts/phase2_acceptance_demo.sh)、[`CONTRIBUTING.md`](../CONTRIBUTING.md)。構成の正本転写は参加者のワークスペース **`docs/24_*` §4 以降**および **`25_rde_engineering_development_guidelines_awai_mirror_ja.md`**（日本語）。
 
 ## 1. テストレイヤー（運用上の語彙）
 
@@ -43,8 +41,27 @@
 
 ---
 
+## 4. Positive と Negative／不変観（Awai の転載を Kotonoha に対応させる）
+
+[**Awai `rde_testing_policy`**](https://github.com/zyx-corporation/awai-commons/blob/main/docs/engineering/rde_testing_policy.md) の §§1〜3 に相当する整理：**Positive** は規範整合な受理・WARN・終了コードの回帰。**Negative** は `spec_bundle`／`spec_version` 不一致や禁止形状が混入しないことの断言。Flexible JSON が規範拡張のように見える状態を許さない（Mongo での禁止コレクション固定と同型で、単体±Postgres で止める）。
+
+## 5. Negative を厚くする領域の目安
+
+ワークスペースにある運用ポリシードラフト **`19`**（トリガ）と強く結ぶ領域（規範、interchange、DDL、**`lost`** 等）ほど Negative を優先する。**`lost`** と **[#3](https://github.com/zyx-corporation/kotonoha-spec/issues/3)** および運用ドラフト **`08`** のトレースを切らない。
+
+## 6. Red→Green→Refactor と PR
+
+不変側は Negative を先に。複数論点なら分割。PR に「どの逸脱を防ぐか」を短文で。**[Awai `rde_development_guidelines` §5 に相当**](https://github.com/zyx-corporation/awai-commons/blob/main/docs/engineering/rde_development_guidelines.md)する記載は、ワークスペースの開発転写ドラフト **`25_rde_engineering_development_guidelines_awai_mirror_ja.md`** を参照する。
+
+## 7. CI と CLI フェーズ級
+
+単体 rejects を CI で常時。Postgres は `DATABASE_URL`。利用者側の証跡は **`phase2_acceptance_demo`**（上リンク）を代替しない。**ブラウザ E2E**は現行 OSS ゲートには含めない。
+
+---
+
 ## 変更履歴
 
 | 日付 | 変更内容 |
 | --- | --- |
-| 2026-05-11 | 社内向け `docs/24_*` と同趣旨・同見出しで初版転載（実装並列トラック #41 と同期） |
+| 2026-05-11 | 初版転載 |
+| 2026-05-11 | §4〜7：Awai テスト／開発ドラフトおよび社内 **`24`/`25`** と整合 |

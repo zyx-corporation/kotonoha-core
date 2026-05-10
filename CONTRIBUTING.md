@@ -2,6 +2,8 @@
 
 Follow [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec) for normative behaviour. Informative governance for this crate in the ecosystem: [`docs/repository-governance.md`](docs/repository-governance.md).
 
+Sister-project **engineering RDE norms** adapted for organizational Japanese drafts **§§24–25**: **[Awai `rde_development_guidelines`](https://github.com/zyx-corporation/awai-commons/blob/main/docs/engineering/rde_development_guidelines.md)** (PR **ΔM** / triggers); **[Awai `rde_testing_policy`](https://github.com/zyx-corporation/awai-commons/blob/main/docs/engineering/rde_testing_policy.md)** (Positive / Negative layers, sequencing). Behavioural mapping for this codebase: **[`docs/unit_testing_guidelines.md`](docs/unit_testing_guidelines.md)** — keep OSS PR descriptions free of links to non-public trackers when possible.
+
 Update [`docs/spec-traceability.md`](docs/spec-traceability.md) when you add or change public API surface tied to the specification.
 
 ## Build & tests

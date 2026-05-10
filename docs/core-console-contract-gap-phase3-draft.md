@@ -1,6 +1,6 @@
 # Core ⇄ console contract — Phase 3 gap memo (informative)
 
-Companion to the internal **`kotonoha-management`** outline [`docs/20_phase3_core_console_contract_outline_draft.md`](https://github.com/zyx-corporation/kotonoha-management/blob/main/docs/20_phase3_core_console_contract_outline_draft.md) (**W-2**). No normative requirement here — code is the arbiter unless promoted to **`kotonoha-spec`** per [`17`-style escalation workflow](https://github.com/zyx-corporation/kotonoha-management/blob/main/docs/17_spec_escalation_workflow.md). Review: [management #34](https://github.com/zyx-corporation/kotonoha-management/issues/34).
+Informative memo comparing **draft** expectations for a future core ⇄ console / UI boundary (maintained in organization internal planning) to **`kotonoha-core`** as it exists today. No normative requirement here — code is the arbiter unless behaviour is promoted through **`kotonoha-spec`** in the usual public escalation path.
 
 ## Event names (outline §2) vs current **`kotonoha-core`**
 
@@ -25,4 +25,4 @@ When behaviour changes, refresh this memo in the **same branch** as `docs/spec-t
 
 | Date | Summary |
 | --- | --- |
-| 2026-05-11 | Initial memo for Phase 3 W-2 cross-check (management `#34`/`#41`) |
+| 2026-05-10 | Initial memo; OSS mirror omits hyperlinks to private planning repositories (**#37**-style). |

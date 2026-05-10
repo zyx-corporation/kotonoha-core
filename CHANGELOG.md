@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.5] — 2026-05-10
+
+### Fixed
+
+- Migration **`20260510120000_v0_interchange_documents.sql`**: GIN index on `payload` uses **`jsonb_path_ops`** (PostgreSQL JSONB operator class). The previous **`json_path_ops`** name was invalid and caused migration failure.
+
+### Added
+
+- PostgreSQL **integration tests** (marked `#[ignore]`; run with `DATABASE_URL` and `cargo test --features postgres -- --include-ignored`).
+- **CI**: PostgreSQL 16 service, `DATABASE_URL`, and the postgres integration test command above.
+
+### Changed
+
+- **`uuid`** optional dependency: enable **`v4`** so integration tests can generate unique IDs.
+
 ## [0.1.4] — 2026-05-10
 
 ### Changed

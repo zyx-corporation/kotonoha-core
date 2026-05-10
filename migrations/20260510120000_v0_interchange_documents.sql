@@ -9,7 +9,7 @@ CREATE TABLE interchange_documents (
     created_at TIMESTAMPTZ NOT NULL DEFAULT now ()
 );
 
-CREATE INDEX idx_interchange_documents_payload_gin ON interchange_documents USING gin (payload json_path_ops);
+CREATE INDEX idx_interchange_documents_payload_gin ON interchange_documents USING gin (payload jsonb_path_ops);
 
 COMMENT ON TABLE interchange_documents IS 'Stores full interchange envelopes (non-normative helper); see kotonoha-core interchange module.';
 

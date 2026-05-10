@@ -7,7 +7,21 @@ Follow [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec) for n
 ```bash
 cargo test
 cargo fmt --all --check
+cargo check --features postgres
 ```
+
+### PostgreSQL feature
+
+Integration tests that hit a real database live behind `#[ignore]` and only run when you pass `--include-ignored` and set `DATABASE_URL`.
+
+Example after starting PostgreSQL (see [`docker-compose.yml`](docker-compose.yml); database name there is `kotonoha_dev`):
+
+```bash
+export DATABASE_URL=postgres://kotonoha:kotonoha@localhost:5432/kotonoha_dev
+cargo test --features postgres -- --include-ignored
+```
+
+Without `DATABASE_URL`, ignored tests are skipped so `cargo test --features postgres` still completes without a running database.
 
 ## Workflow
 

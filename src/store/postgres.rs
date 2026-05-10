@@ -205,3 +205,111 @@ impl PgStore {
         Ok(id)
     }
 }
+
+#[cfg(all(test, feature = "postgres"))]
+mod postgres_integration_tests {
+    use super::*;
+    use crate::interchange::INTERCHANGE_FORMAT_V1;
+    use crate::TARGET_SPEC_BUNDLE;
+
+    fn database_url_for_integration_test() -> String {
+        std::env::var("DATABASE_URL").unwrap_or_else(|_| {
+            panic!(
+                "postgres integration tests need DATABASE_URL when running with --include-ignored; \
+                 see CONTRIBUTING.md (e.g. docker compose then export DATABASE_URL=...)"
+            );
+        })
+    }
+
+    #[tokio::test]
+    #[ignore = "requires DATABASE_URL and PostgreSQL (run with: cargo test --features postgres -- --include-ignored)"]
+    async fn migrate_inserts_interchange_and_lineage_row() {
+        let url = database_url_for_integration_test();
+        let store = PgStore::connect(&url).await.expect("connect");
+        store.migrate().await.expect("migrate");
+
+        let lid = format!("https://example.invalid/pg-itest/{}", uuid::Uuid::new_v4());
+        let json = serde_json::json!({
+            "format": INTERCHANGE_FORMAT_V1,
+            "spec_bundle": TARGET_SPEC_BUNDLE,
+            "lineage_unit": { "id": lid, "prior_unit_id": null },
+        })
+        .to_string();
+
+        let interchange_id = store
+            .insert_interchange_document_json(&json, false)
+            .await
+            .expect("insert_interchange_document_json");
+
+        let n: i64 =
+            sqlx::query_scalar("SELECT COUNT(*)::bigint FROM interchange_documents WHERE id = $1")
+                .bind(interchange_id)
+                .fetch_one(store.pool())
+                .await
+                .expect("count interchange_documents");
+        assert_eq!(n, 1, "interchange_documents row");
+
+        let n: i64 = sqlx::query_scalar("SELECT COUNT(*)::bigint FROM lineage_units WHERE id = $1")
+            .bind(&lid)
+            .fetch_one(store.pool())
+            .await
+            .expect("count lineage_units");
+        assert_eq!(n, 1, "lineage_units materialized");
+    }
+
+    #[tokio::test]
+    #[ignore = "requires DATABASE_URL and PostgreSQL (run with: cargo test --features postgres -- --include-ignored)"]
+    async fn migrate_inserts_interchange_lineage_and_rde_rows() {
+        let url = database_url_for_integration_test();
+        let store = PgStore::connect(&url).await.expect("connect");
+        store.migrate().await.expect("migrate");
+
+        let lid = format!("https://example.invalid/pg-itest/{}", uuid::Uuid::new_v4());
+        let subject = format!(
+            "https://example.invalid/subject-itest/{}",
+            uuid::Uuid::new_v4()
+        );
+        let rde = serde_json::json!({
+            "rde_review_output": {
+                "spec_version": TARGET_SPEC_BUNDLE,
+                "subject_ref": subject,
+                "categories": {
+                    "preserved": [],
+                    "transformed": [],
+                    "complemented": [],
+                    "intentionally_unresolved": [],
+                    "lost": [],
+                    "deviation_risk": [],
+                    "next_update_policy": []
+                }
+            }
+        });
+        let json = serde_json::json!({
+            "format": INTERCHANGE_FORMAT_V1,
+            "spec_bundle": TARGET_SPEC_BUNDLE,
+            "lineage_unit": { "id": lid, "prior_unit_id": null },
+            "rde_document": rde,
+        })
+        .to_string();
+
+        store
+            .insert_interchange_document_json(&json, false)
+            .await
+            .expect("insert");
+
+        let n: i64 = sqlx::query_scalar("SELECT COUNT(*)::bigint FROM lineage_units WHERE id = $1")
+            .bind(&lid)
+            .fetch_one(store.pool())
+            .await
+            .unwrap();
+        assert_eq!(n, 1);
+
+        let n: i64 =
+            sqlx::query_scalar("SELECT COUNT(*)::bigint FROM rde_documents WHERE subject_ref = $1")
+                .bind(&subject)
+                .fetch_one(store.pool())
+                .await
+                .unwrap();
+        assert_eq!(n, 1);
+    }
+}

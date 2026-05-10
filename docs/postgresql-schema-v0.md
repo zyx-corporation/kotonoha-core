@@ -36,7 +36,7 @@ Stores one JSON document per row: the full core **interchange envelope** (`forma
 
 | Column | Notes |
 | --- | --- |
-| `payload` | JSONB; entire envelope (may embed `lineage_unit` and/or `rde_document`). Gin index for containment queries. |
+| `payload` | JSONB; entire envelope (may embed `lineage_unit` and/or `rde_document`). GIN index on `payload` using **`jsonb_path_ops`** for containment-style queries. |
 
 [`PgStore::insert_interchange_document_json`](https://github.com/zyx-corporation/kotonoha-core/blob/main/src/store/postgres.rs) stores the envelope here and, **in the same transaction**, inserts matching rows into **`lineage_units`** and **`rde_documents`** when the envelope includes `lineage_unit` and/or `rde_document`, so the canonical interchange artifact and query-friendly tables stay aligned.
 

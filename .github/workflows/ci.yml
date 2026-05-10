@@ -12,6 +12,22 @@ env:
 jobs:
   rust:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: kotonoha
+          POSTGRES_PASSWORD: kotonoha
+          POSTGRES_DB: kotonoha_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kotonoha -d kotonoha_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgres://kotonoha:kotonoha@localhost:5432/kotonoha_test
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -19,7 +35,9 @@ jobs:
           components: rustfmt
       - name: cargo fmt --check
         run: cargo fmt --all --check
-      - name: cargo test
+      - name: cargo test (default features)
         run: cargo test --verbose
-      - name: cargo check (postgres feature)
-        run: cargo check --features postgres --verbose
+      - name: cargo test (postgres + DB integration)
+        env:
+          DATABASE_URL: postgres://kotonoha:kotonoha@localhost:5432/kotonoha_test
+        run: cargo test --features postgres --verbose -- --include-ignored

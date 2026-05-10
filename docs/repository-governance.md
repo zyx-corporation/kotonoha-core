@@ -43,4 +43,4 @@ Operational choices documented here (PostgreSQL migrations, DDL sketches) supple
 
 | Date | Change |
 | --- | --- |
-| 2026-05-10 | Initial English summary derived from internal repository-governance draft (project PR #6 / `kotonoha-management` `13_repository_governance_draft.md`). |
+| 2026-05-10 | Initial English summary derived from an internal governance draft (contributor-visible lineage). |

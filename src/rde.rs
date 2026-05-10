@@ -275,6 +275,80 @@ mod tests {
     }
 
     #[test]
+    fn rejects_category_item_when_not_object() {
+        let j = r#"{
+            "rde_review_output": {
+                "spec_version": "0.1",
+                "subject_ref": "https://example.invalid/x",
+                "categories": {
+                    "preserved": ["not-an-object"],
+                    "transformed": [],
+                    "complemented": [],
+                    "intentionally_unresolved": [],
+                    "lost": [],
+                    "deviation_risk": [],
+                    "next_update_policy": []
+                }
+            }
+        }"#;
+        let e = validate_json(j, false).unwrap_err();
+        assert!(
+            e.contains("must be a JSON object"),
+            "expected object-shape error, got {e:?}"
+        );
+    }
+
+    #[test]
+    fn accepts_extra_keys_inside_category_item_with_summary() {
+        let j = r#"{
+            "rde_review_output": {
+                "spec_version": "0.1",
+                "subject_ref": "https://example.invalid/x",
+                "categories": {
+                    "preserved": [
+                        {
+                            "summary": "kept intact",
+                            "implementation_tracking_id": "tool-xyz-42",
+                            "priority": null
+                        }
+                    ],
+                    "transformed": [],
+                    "complemented": [],
+                    "intentionally_unresolved": [],
+                    "lost": [],
+                    "deviation_risk": [],
+                    "next_update_policy": []
+                }
+            }
+        }"#;
+        assert!(validate_json(j, false).unwrap().is_empty());
+    }
+
+    #[test]
+    fn rejects_spec_version_when_not_json_string() {
+        let j = r#"{
+            "rde_review_output": {
+                "spec_version": 0.1,
+                "subject_ref": "https://example.invalid/x",
+                "categories": {
+                    "preserved": [],
+                    "transformed": [],
+                    "complemented": [],
+                    "intentionally_unresolved": [],
+                    "lost": [],
+                    "deviation_risk": [],
+                    "next_update_policy": []
+                }
+            }
+        }"#;
+        let e = validate_json(j, false).unwrap_err();
+        assert!(
+            e.contains("spec_version"),
+            "expected spec_version error, got {e:?}"
+        );
+    }
+
+    #[test]
     fn rejects_category_entry_when_not_array() {
         let j = r#"{
             "rde_review_output": {

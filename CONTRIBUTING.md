@@ -33,6 +33,7 @@ cargo test --features postgres -- --include-ignored
 
 Without `DATABASE_URL`, ignored tests are skipped so `cargo test --features postgres` still completes without a running database.
 
+**CI:** [.github/workflows/ci.yml](.github/workflows/ci.yml) starts PostgreSQL 16 (`kotonoha_test`), sets **`DATABASE_URL`**, and runs `cargo test --features postgres -- --include-ignored` after the default **`cargo test`**, so **`#[ignore]`** integration tests (`src/store/postgres.rs`) run on **`main`** and pull requests automatically.
 ## Workflow
 
 Organization **Git/Issue/branch/PR** rules (**no direct edits to `main`**): **[`docs/git_operation_rules.md`](docs/git_operation_rules.md)** (Japanese; self-contained in this repo).

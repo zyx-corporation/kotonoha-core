@@ -27,6 +27,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     env:
+      # Passed to `--include-ignored` integration tests (`src/store/postgres.rs`).
       DATABASE_URL: postgres://kotonoha:kotonoha@localhost:5432/kotonoha_test
     steps:
       - uses: actions/checkout@v4
@@ -35,9 +36,7 @@ jobs:
           components: rustfmt
       - name: cargo fmt --check
         run: cargo fmt --all --check
-      - name: cargo test (default features)
+      - name: cargo test (library, default features)
         run: cargo test --verbose
-      - name: cargo test (postgres + DB integration)
-        env:
-          DATABASE_URL: postgres://kotonoha:kotonoha@localhost:5432/kotonoha_test
+      - name: cargo test (--features postgres, DB + ignored integration)
         run: cargo test --features postgres --verbose -- --include-ignored

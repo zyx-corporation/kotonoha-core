@@ -5,10 +5,10 @@ This document maps **`kotonoha-core`** Rust modules to [`kotonoha-spec`](https:/
 | `kotonoha-spec` document | Rust module / symbol |
 | --- | --- |
 | [`docs/rde-review-output.md`](https://github.com/zyx-corporation/kotonoha-spec/blob/main/docs/rde-review-output.md) | [`src/rde.rs`](../src/rde.rs) — `validate_json` |
-| [`docs/semantic-lineage-model.md`](https://github.com/zyx-corporation/kotonoha-spec/blob/main/docs/semantic-lineage-model.md) | [`src/lineage.rs`](../src/lineage.rs) — `LineageUnit` |
+| [`docs/semantic-lineage-model.md`](https://github.com/zyx-corporation/kotonoha-spec/blob/main/docs/semantic-lineage-model.md) | [`src/lineage.rs`](../src/lineage.rs) — `LineageUnit` (serde **`deny_unknown_fields`**: only `id`, `prior_unit_id` in interchange JSON) |
 | [`docs/representation-of-loss.md`](https://github.com/zyx-corporation/kotonoha-spec/blob/main/docs/representation-of-loss.md) | Enforced indirectly via RDE `lost` category validation in `rde.rs`; **normative expansion** tracked publicly in [`kotonoha-spec#3`](https://github.com/zyx-corporation/kotonoha-spec/issues/3). |
 | [`docs/introduction.md`](https://github.com/zyx-corporation/kotonoha-spec/blob/main/docs/introduction.md) | [`TARGET_SPEC_BUNDLE`](../src/lib.rs) — must align with interchange `spec_version` |
-| *(non-normative envelope)* | [`src/interchange.rs`](../src/interchange.rs) — `validate_interchange_json`, bundles lineage +/or RDE for pipelines |
+| *(non-normative envelope)* | [`src/interchange.rs`](../src/interchange.rs) — `validate_interchange_json`; [`InterchangeDocument`](../src/interchange.rs) uses serde **`deny_unknown_fields`** at the **top level** (`format`, `spec_bundle`, `lineage_unit`, `rde_document` only). Nested **`lineage_unit`** objects use the same rule via [`LineageUnit`](../src/lineage.rs) (`id`, `prior_unit_id` only). |
 
 ## Phase 2 minimal scope (this repository)
 

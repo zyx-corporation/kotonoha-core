@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- [`docs/spec-traceability.md`](docs/spec-traceability.md) — [`representation-of-loss.md`](https://github.com/zyx-corporation/kotonoha-spec/blob/main/docs/representation-of-loss.md) mapping now cites public tracking **[`kotonoha-spec#3`](https://github.com/zyx-corporation/kotonoha-spec/issues/3)** for optional normative follow-up beyond the RDE `lost` pathway.
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — PR guidance for linking that issue when expanding loss semantics.
+
 ### Added
 
 - [`docs/repository-governance.md`](docs/repository-governance.md) — informative ecosystem and change-flow summary for implementers.

@@ -29,6 +29,7 @@ Without `DATABASE_URL`, ignored tests are skipped so `cargo test --features post
 
 1. Open an **Issue** for design questions that might affect the public specification (resolve in `kotonoha-spec` first when normative).
 2. **Pull requests** should include tests and traceability updates.
+3. Behaviour that expands **representation of lost elements** beyond the current RDE `lost`-category pathway should cite **[issue #3](https://github.com/zyx-corporation/kotonoha-spec/issues/3)** in the PR body when opening follow-up discussions (successor PRs inherit the linkage).
 
 ## License
 

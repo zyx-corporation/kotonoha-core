@@ -33,6 +33,8 @@ Requires [Rust](https://www.rust-lang.org/tools/install) stable (MSRV in `Cargo.
 cargo test
 ```
 
+Test layering (unit vs database integration vs acceptance): [**`docs/unit_testing_guidelines.md`**](docs/unit_testing_guidelines.md) (**[`docs/unit_testing_guidelines_ja.md`](docs/unit_testing_guidelines_ja.md)**).
+
 ### Persistence (deployments)
 
 Production-oriented storage targets **PostgreSQL** as the single primary database — see [`docs/persistence.md`](docs/persistence.md).

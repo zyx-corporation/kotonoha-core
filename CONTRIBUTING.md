@@ -4,13 +4,15 @@ Follow [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec) for n
 
 Update [`docs/spec-traceability.md`](docs/spec-traceability.md) when you add or change public API surface tied to the specification.
 
-## Build
+## Build & tests
 
 ```bash
 cargo test
 cargo fmt --all --check
 cargo check --features postgres
 ```
+
+Layering (**unit vs integration vs acceptance**): **[`docs/unit_testing_guidelines.md`](docs/unit_testing_guidelines.md)** (Japanese sibling: **[`docs/unit_testing_guidelines_ja.md`](docs/unit_testing_guidelines_ja.md)**).
 
 ### PostgreSQL feature
 

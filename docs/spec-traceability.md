@@ -12,7 +12,10 @@ This document maps **`kotonoha-core`** Rust modules to [`kotonoha-spec`](https:/
 
 ## Phase 2 minimal scope (this repository)
 
-The following are **in scope for Phase 2 “minimal implementation”** here, anchored on public sources: **`kotonoha-docs`** ([Phase 2 CLI walkthrough](https://github.com/zyx-corporation/kotonoha-docs/blob/main/docs/tutorials/phase2_cli_walkthrough.md)) and **`kotonoha-cli`** CI / [`scripts/phase2_acceptance_demo.sh`](https://github.com/zyx-corporation/kotonoha-cli/blob/main/scripts/phase2_acceptance_demo.sh):
+Development expectations for **`cargo test`** layering vs CLI acceptance demos: **[`docs/unit_testing_guidelines.md`](unit_testing_guidelines.md)**.
+
+The following are **in scope for Phase 2 “minimal implementation”** here, anchored on public sources:
+ **`kotonoha-docs`** ([Phase 2 CLI walkthrough](https://github.com/zyx-corporation/kotonoha-docs/blob/main/docs/tutorials/phase2_cli_walkthrough.md)) and **`kotonoha-cli`** CI / [`scripts/phase2_acceptance_demo.sh`](https://github.com/zyx-corporation/kotonoha-cli/blob/main/scripts/phase2_acceptance_demo.sh):
 
 | Delivered in Phase 2 | Notes |
 | --- | --- |

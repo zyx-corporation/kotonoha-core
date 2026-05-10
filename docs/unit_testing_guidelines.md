@@ -18,7 +18,7 @@ Related methodology (applied to Kotonoha in organizational Japanese drafts **§2
 
 We adopt **[Awai’s Positive / Negative split](https://github.com/zyx-corporation/awai-commons/blob/main/docs/engineering/rde_testing_policy.md)**: **Positive** proves spec‑aligned validators and CLI-visible outcomes regress safely; **Negative** freezes **disallowed shapes** (bad `spec_version` / `spec_bundle`, empty envelopes, malformed RDE envelopes, etc.) so “flexible JSON” cannot silently become a norm expansion. Treat failing Negative suites as semantic drift risks, not only “bugs”.
 
-## TDD sequencing for risky changes
+**Do not widen normative meaning via tests alone:** follow **`spec` Issue / PR → `spec-traceability` + unit tests → `cli-definition` exit codes** in that order when behaviour must change (mirrors internal doc **§5.1** after Awai §3.1).
 
 For changes that resemble **cross-repo interchange / catalogue / DDL** edits, follow **[§5 of Awai `rde_development_guidelines`](https://github.com/zyx-corporation/awai-commons/blob/main/docs/engineering/rde_development_guidelines.md)**-style PR notes (ΔM / guards), mapped to organizational Japanese draft **§25**: prefer **Red → Green → Refactor**. When touching invariants **write or extend Negative assertions first**. If implementation landed ahead of tests, commit a failing repro first, then fix in a follow‑up commit. Keep unrelated ΔMs out of one PR where practical; state in the PR which drift each guard blocks.
 

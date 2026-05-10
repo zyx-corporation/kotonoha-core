@@ -35,7 +35,8 @@ Organization **Git/Issue/branch/PR** rules (**no direct edits to `main`**): **[`
 
 1. Open an **Issue** for design questions that might affect the public specification (resolve in `kotonoha-spec` first when normative).
 2. **Pull requests** should include tests and traceability updates.
-3. Behaviour that expands **representation of lost elements** beyond the current RDE `lost`-category pathway should cite **[issue #3](https://github.com/zyx-corporation/kotonoha-spec/issues/3)** in the PR body when opening follow-up discussions (successor PRs inherit the linkage).
+3. For substantive **interchange**, **RDE catalogue**, **Postgres DDL**, or **spec-bundle** churn, summarise **ΔM and guards** in the PR body (see [**Awai `rde_development_guidelines`](https://github.com/zyx-corporation/awai-commons/blob/main/docs/engineering/rde_development_guidelines.md) §5 and **[`docs/unit_testing_guidelines.md`](docs/unit_testing_guidelines.md)**).
+4. Behaviour that expands **representation of lost elements** beyond the current RDE `lost`-category pathway should cite **[issue #3](https://github.com/zyx-corporation/kotonoha-spec/issues/3)** in the PR body when opening follow-up discussions (successor PRs inherit the linkage).
 
 ## License
 

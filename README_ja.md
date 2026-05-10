@@ -51,3 +51,4 @@ cargo test
 ## リンク
 
 - 本リポジトリ: https://github.com/zyx-corporation/kotonoha-core
+- GitHub Projects（組織運用・英語）: [`docs/github_projects_policy.md`](docs/github_projects_policy.md)

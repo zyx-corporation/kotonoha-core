@@ -73,3 +73,4 @@ Unless otherwise stated in a specific file, repository content is licensed under
 ## Links
 
 - Repository: https://github.com/zyx-corporation/kotonoha-core
+- GitHub Projects (organization workflow): [`docs/github_projects_policy.md`](docs/github_projects_policy.md)

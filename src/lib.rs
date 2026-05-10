@@ -1,0 +1,14 @@
+//! **Kotonoha OSS core** — semantic lineage primitives and RDE interchange validation.
+//!
+//! Behaviour aligns with [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec).
+//! See repository `docs/spec-traceability.md` for section mapping.
+
+/// [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec) bundle targeted by this crate release for interchange validation.
+pub const TARGET_SPEC_BUNDLE: &str = "0.1";
+
+pub mod interchange;
+pub mod lineage;
+pub mod rde;
+
+#[cfg(feature = "postgres")]
+pub mod store;

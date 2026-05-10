@@ -1,0 +1,25 @@
+[package]
+name = "kotonoha_core"
+version = "0.1.5"
+edition = "2021"
+description = "OSS core library for Kotonoha / Semantic Lineage System (SLS)"
+license = "Apache-2.0"
+repository = "https://github.com/zyx-corporation/kotonoha-core"
+rust-version = "1.74"
+
+[lib]
+path = "src/lib.rs"
+
+[features]
+default = []
+postgres = ["dep:sqlx", "dep:tokio", "dep:uuid"]
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio", "postgres", "migrate", "json", "uuid"], optional = true }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"], optional = true }
+uuid = { version = "1", optional = true, features = ["v4"] }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }

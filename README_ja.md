@@ -6,11 +6,26 @@
 
 ## 範囲
 
-- SLS のコアライブラリおよび実行時コンポーネント
-- 開発者向けドキュメント、ビルド手順、コントリビューションに関する注記（コードベースの成長に合わせて拡充）
-- 仕様書とは切り分け、コードと一体で扱う実装上のメモ
+- SLS のコアライブラリおよび実行時コンポーネント（Phase 2 以降）
+- 開発者向けドキュメント、ビルド手順、コントリビューションに関する注記
 
-規範となる公開仕様は [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec) に置きます。本リポジトリは、それらの仕様に基づくコードと開発者向け成果物を中心に扱います。
+規範となる公開仕様は [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec) に置きます。コードと仕様セクションの対応は **[仕様トレース（英語）](docs/spec-traceability.md)** を参照してください。
+
+### Phase 2（現状の最小構成）
+
+Rust クレート **`kotonoha_core`**：`lineage::LineageUnit`、`rde::validate_json`、`interchange::validate_interchange_json`、`TARGET_SPEC_BUNDLE`（詳細は [README.md](README.md)）。
+
+### ビルド
+
+[Rust](https://www.rust-lang.org/tools/install) が必要です。
+
+```bash
+cargo test
+```
+
+### 永続化（デプロイメント）
+
+本番整合の中心ストアは **PostgreSQL 一本**とする（詳細は英語 [`docs/persistence.md`](docs/persistence.md)）。初期 DDL は [`migrations/20260510000000_v0_init.sql`](migrations/20260510000000_v0_init.sql)、ローカル用 [`docker-compose.yml`](docker-compose.yml) を参照。Rust からは Cargo 機能 **`postgres`** で [`store::postgres`](src/store/postgres.rs)（マイグレーション・検証済み INSERT）が利用可能。
 
 ## 関連リポジトリ
 
@@ -20,6 +35,7 @@
 | --- | --- |
 | [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec) | 公開仕様の正本 |
 | **kotonoha-core（本リポジトリ）** | SLS の OSS コア実装 |
+| [`kotonoha-cli`](https://github.com/zyx-corporation/kotonoha-cli) | 公式 CLI（[`CLI 定義`](https://github.com/zyx-corporation/kotonoha-cli/blob/main/docs/cli-definition.md)） |
 | [`kotonoha-docs`](https://github.com/zyx-corporation/kotonoha-docs) | 仕様に含まない公開ドキュメント（マニュアル・チュートリアル等） |
 
 可能な限り、実装の変更は [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec) の仕様と整合させます。設計論点が未解決の場合は、公開仕様の側で整理してからコードの振る舞いを固定します。
@@ -35,3 +51,4 @@
 ## リンク
 
 - 本リポジトリ: https://github.com/zyx-corporation/kotonoha-core
+- GitHub Projects（組織運用・英語）: [`docs/github_projects_policy.md`](docs/github_projects_policy.md)

@@ -11,7 +11,10 @@ use crate::lineage::LineageUnit;
 pub const INTERCHANGE_FORMAT_V1: &str = "kotonoha.interchange.v1";
 
 /// Document envelope for exchanging lineage and/or RDE review output between tools (`kotonoha-core` Phase 2).
+///
+/// serde **`deny_unknown_fields`**: top‑level interchange JSON must include only recognised envelope keys (`format`, `spec_bundle`, `lineage_unit`, `rde_document`), rejecting stray keys that might otherwise read as tacit spec evolution.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct InterchangeDocument {
     /// Must be [`INTERCHANGE_FORMAT_V1`].
     pub format: String,
@@ -166,6 +169,46 @@ mod tests {
     #[test]
     fn rejects_invalid_json_syntax() {
         assert!(validate_interchange_json("{ not json", false).is_err());
+    }
+
+    #[test]
+    fn rejects_json_when_root_not_object() {
+        let r = validate_interchange_json("[1]", false);
+        assert!(
+            r.is_err(),
+            "expected deserialize error for array root: {r:?}"
+        );
+    }
+
+    #[test]
+    fn rejects_unknown_top_level_fields() {
+        let j = serde_json::json!({
+            "format": INTERCHANGE_FORMAT_V1,
+            "spec_bundle": crate::TARGET_SPEC_BUNDLE,
+            "lineage_unit": { "id": "https://example.invalid/env-unknown-fields" },
+            "extraEnvelopeKey": false,
+        })
+        .to_string();
+        let e = validate_interchange_json(&j, false).unwrap_err();
+        assert!(
+            e.contains("unknown field") || e.contains("unknown"),
+            "expected unknown-field deserialization error: {e:?}"
+        );
+    }
+
+    #[test]
+    fn rejects_unknown_field_inside_lineage_unit() {
+        let j = serde_json::json!({
+            "format": INTERCHANGE_FORMAT_V1,
+            "spec_bundle": crate::TARGET_SPEC_BUNDLE,
+            "lineage_unit": {
+                "id": "https://example.invalid/lineage-extra",
+                "prior_unit_id": null,
+                "not_in_model": true,
+            },
+        })
+        .to_string();
+        assert!(validate_interchange_json(&j, false).is_err());
     }
 
     #[test]

@@ -15,6 +15,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - [`docs/repository-governance.md`](docs/repository-governance.md) — informative ecosystem and change-flow summary for implementers.
 
+## [0.1.6] — 2026-05-10
+
+### Changed
+
+- **`InterchangeDocument` deserialization**: serde **`#[serde(deny_unknown_fields)]`** — JSON envelopes with unknown **top‑level** keys are rejected (`validate_interchange_json` / `from_json_str`), reducing “flexible JSON” drift versus informal spec extension. **Migrating callers** that relied on tolerated extra envelope fields must strip or rename them before validation.
+- **`LineageUnit` deserialization** (within interchange `lineage_unit`): **`#[serde(deny_unknown_fields)]`** — only **`id`** and **`prior_unit_id`** are accepted in JSON objects passed through the interchange parser.
+- **CI**: job-level **`DATABASE_URL`** documents intent for Postgres integration tests (`--features postgres` **`-- --include-ignored`**); clarified step naming.
+
+### Added
+
+- **Thirty** `#[cfg(test)]` library cases covering interchange **unknown fields** (envelope + `lineage_unit`), RDE **category / `spec_version`** edges, nested RDE in interchange (**strict**), and related Positive paths.
+
 ## [0.1.5] — 2026-05-10
 
 ### Fixed

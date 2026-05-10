@@ -11,6 +11,10 @@
 
 Normative, review-facing specifications live in [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec). This repository implements those specifications; see **[spec traceability](docs/spec-traceability.md)** for section ↔ code mapping.
 
+### Repository governance (informative)
+
+[**`docs/repository-governance.md`**](docs/repository-governance.md) summarizes ecosystem roles (spec vs implementation), recommended change flow, and RDE scope — **not normative**. When in doubt, follow [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec).
+
 ### Phase 2 (current minimum)
 
 Rust crate **`kotonoha_core`** (`Cargo.toml`):

@@ -1,6 +1,8 @@
 # Contributing to kotonoha-core
 
-Follow [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec) for normative behaviour. Update [`docs/spec-traceability.md`](docs/spec-traceability.md) when you add or change public API surface tied to the specification.
+Follow [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec) for normative behaviour. Informative governance for this crate in the ecosystem: [`docs/repository-governance.md`](docs/repository-governance.md).
+
+Update [`docs/spec-traceability.md`](docs/spec-traceability.md) when you add or change public API surface tied to the specification.
 
 ## Build
 

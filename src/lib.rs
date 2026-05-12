@@ -9,6 +9,7 @@ pub const TARGET_SPEC_BUNDLE: &str = "0.1";
 pub mod interchange;
 pub mod lineage;
 pub mod rde;
+pub mod rde_impl;
 
 #[cfg(feature = "postgres")]
 pub mod store;

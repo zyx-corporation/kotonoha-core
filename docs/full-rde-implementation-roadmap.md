@@ -60,6 +60,8 @@ The core should remain model-agnostic. Model-backed evaluators should be plugins
 
 A fuller RDE implementation should evolve toward the following layers.
 
+[HTML rendering of this structure](full-rde-structure.html) is available for browser review. The source SVG is [`assets/full-rde-structure.svg`](assets/full-rde-structure.svg).
+
 ![Full RDE structure concept](assets/full-rde-structure.svg)
 
 The SVG above is a conceptual diagram. It illustrates the intended implementation direction, but the normative source remains `kotonoha-spec` SLS-5 and the Rust contracts that this repository actually exposes.

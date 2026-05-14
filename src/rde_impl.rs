@@ -229,7 +229,8 @@ impl RdeEvaluation {
 
 /// RDE evaluator boundary from SLS-5.3.1.
 pub trait RdeEvaluator {
-    fn evaluate(&self, subject: &RdeSubject, context: &RdeContext) -> Result<RdeEvaluation, String>;
+    fn evaluate(&self, subject: &RdeSubject, context: &RdeContext)
+        -> Result<RdeEvaluation, String>;
 }
 
 /// A deterministic minimal evaluator useful for tests, demos, and integration scaffolding.
@@ -241,7 +242,11 @@ pub trait RdeEvaluator {
 pub struct ConservativeRdeEvaluator;
 
 impl RdeEvaluator for ConservativeRdeEvaluator {
-    fn evaluate(&self, subject: &RdeSubject, context: &RdeContext) -> Result<RdeEvaluation, String> {
+    fn evaluate(
+        &self,
+        subject: &RdeSubject,
+        context: &RdeContext,
+    ) -> Result<RdeEvaluation, String> {
         subject.validate()?;
 
         let mut evaluation = RdeEvaluation::new(subject.subject_ref.clone());
@@ -260,13 +265,17 @@ impl RdeEvaluator for ConservativeRdeEvaluator {
                     "source and changed material are textually identical; no material semantic change is inferred by the conservative evaluator",
                 ));
             }
-            (Some(source), Some(changed)) if source.trim().is_empty() && !changed.trim().is_empty() => {
+            (Some(source), Some(changed))
+                if source.trim().is_empty() && !changed.trim().is_empty() =>
+            {
                 evaluation.push(RdeObservation::new(
                     RdeCategory::Complemented,
                     "changed material adds content where the supplied source material is empty",
                 ));
             }
-            (Some(source), Some(changed)) if !source.trim().is_empty() && changed.trim().is_empty() => {
+            (Some(source), Some(changed))
+                if !source.trim().is_empty() && changed.trim().is_empty() =>
+            {
                 evaluation.push(RdeObservation::new(
                     RdeCategory::Lost,
                     "changed material is empty while source material was present; potential semantic loss should be reviewed",

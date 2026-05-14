@@ -23,6 +23,10 @@ Informative memo comparing **draft** expectations for a future core ⇄ console 
 
 Validators return structured errors internally; **`cli-definition`** user-facing wording is authoritative for CLI exits. Explicit **enumeration** aligned with **`validation.shape`**, **`validation.semantic`**, **`escalation.spec_gap`** (outline §4) for a future core ↔ console API boundary is **not yet implemented** in typed form. **Informative mapping (v0 candidate):** [kotonoha-management#34 comment (P3-2b)](https://github.com/zyx-corporation/kotonoha-management/issues/34#issuecomment-4449294038).
 
+## M3.3 trace — `console_event` → CLI exit → outline §4 (informative)
+
+**P3-3d** spine for [`22` M3.3 acceptance](https://github.com/zyx-corporation/kotonoha-management/blob/main/docs/22_phase3_implementation_plan_draft.md): one developer path uses **`kotonoha interchange ingest`** on **`kotonoha.console_event.v0`** JSON (see [`cli-definition` §4.1](https://github.com/zyx-corporation/kotonoha-cli/blob/main/docs/cli-definition.md)). **Wrapper malformed** (missing keys, wrong `version`, unknown `kind`) → CLI exit **`1`**. **`body`** fails `kotonoha_core` validation (shape / semantic / RDE rules) → exit **`2`** — operationally read as **`validation.shape`** / **`validation.semantic`** in [`20` §4](https://github.com/zyx-corporation/kotonoha-management/blob/main/docs/20_phase3_core_console_contract_outline_draft.md) until a typed API exists. **`--persist`** with DB failures → exit **`3`** (**`persistence.*`**). **`escalation.spec_gap`** remains a **process** label (no dedicated exit code today).
+
 ## Maintenance
 
 When behaviour changes, refresh this memo in the **same branch** as `docs/spec-traceability.md`, or substitute with a tighter link-only row there.
@@ -36,3 +40,4 @@ When behaviour changes, refresh this memo in the **same branch** as `docs/spec-t
 | 2026-05-10 | Initial memo; OSS mirror omits hyperlinks to private planning repositories (**#37**-style). |
 | 2026-05-12 | Event rows: **`kotonoha` CLI ≥ 0.2.0** `interchange ingest` + **`kotonoha.console_event.v0`**. |
 | 2026-05-14 | **P3-2c:** [`20` §3](https://github.com/zyx-corporation/kotonoha-management/blob/main/docs/20_phase3_core_console_contract_outline_draft.md) vs `interchange.rs` table; P3-2b exit-code mapping link ([#46](https://github.com/zyx-corporation/kotonoha-management/issues/46)). |
+| 2026-05-14 | **P3-3d:** M3.3 trace subsection (`console_event` → CLI exit → `20` §4 labels). |

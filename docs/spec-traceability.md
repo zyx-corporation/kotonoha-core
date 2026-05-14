@@ -56,6 +56,10 @@ CLI surface contracts: [`kotonoha-cli` `cli-definition.md`](https://github.com/z
 
 DDL sketches: [`migrations/`](../migrations/) — baseline [`20260510000000_v0_init.sql`](../migrations/20260510000000_v0_init.sql), interchange [`20260510120000_v0_interchange_documents.sql`](../migrations/20260510120000_v0_interchange_documents.sql); direction: [`persistence.md`](persistence.md).
 
+## Phase 3 bridge (CLI ingest — informative)
+
+The official **`kotonoha` CLI** (≥ **0.2.0**) exposes **`interchange ingest`** for a **`kotonoha.console_event.v0`** wrapper that dispatches to the same **`rde`** / **`interchange`** validation (and optional Postgres insert) as this crate’s public APIs. **Not normative in `kotonoha-spec`.** **W-2 outline** payload rules: [`20` §3](https://github.com/zyx-corporation/kotonoha-management/blob/main/docs/20_phase3_core_console_contract_outline_draft.md). **Parity / gap tables:** [`core-console-contract-gap-phase3-draft.md`](core-console-contract-gap-phase3-draft.md). Public CLI contract: [`kotonoha-cli` `cli-definition.md` §4.1](https://github.com/zyx-corporation/kotonoha-cli/blob/main/docs/cli-definition.md).
+
 ## Deferred (Phase 3 and later)
 
 Work **not** required to declare Phase 2 minimal implementation complete:

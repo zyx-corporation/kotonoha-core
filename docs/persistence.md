@@ -31,3 +31,4 @@ Initial DDL and column notes:
 | 2026-05-10 | Optional Rust adapter: `kotonoha_core` feature **`postgres`** (`store::postgres`), migrations + validated inserts. |
 | 2026-05-10 | Migration **`20260510120000_v0_interchange_documents.sql`** and **`insert_interchange_document_json`** for `kotonoha.interchange.v1` envelopes. |
 | 2026-05-10 | **`insert_interchange_document_json`** materializes **`lineage_units`** / **`rde_documents`** in the **same transaction** as **`interchange_documents`**. |
+| 2026-05-20 | **M1 draft DDL** [`20260520000000_m1_semantic_lineage.sql`](../migrations/20260520000000_m1_semantic_lineage.sql) — semantic lineage tables; notes in [`postgresql-schema-m1.md`](postgresql-schema-m1.md) ([#21](https://github.com/zyx-corporation/kotonoha-core/issues/21)). |

@@ -54,7 +54,18 @@ CLI surface contracts: [`kotonoha-cli` `cli-definition.md`](https://github.com/z
 | `SLS-7` abstract audit correlation | [`src/store/postgres.rs`](../src/store/postgres.rs) — optional feature **`postgres`**: pool, migrations, append-only `audit_events`, validated `rde_documents` / `lineage_units` inserts |
 | *(non-normative envelope persistence)* | Same — **`insert_interchange_document_json`** → **`interchange_documents`** plus optional **`lineage_units`** / **`rde_documents`** in one transaction ([`interchange.rs`](../src/interchange.rs) validation rules) |
 
-DDL sketches: [`migrations/`](../migrations/) — baseline [`20260510000000_v0_init.sql`](../migrations/20260510000000_v0_init.sql), interchange [`20260510120000_v0_interchange_documents.sql`](../migrations/20260510120000_v0_interchange_documents.sql); direction: [`persistence.md`](persistence.md).
+DDL sketches: [`migrations/`](../migrations/) — baseline [`20260510000000_v0_init.sql`](../migrations/20260510000000_v0_init.sql), interchange [`20260510120000_v0_interchange_documents.sql`](../migrations/20260510120000_v0_interchange_documents.sql), M1 draft [`20260520000000_m1_semantic_lineage.sql`](../migrations/20260520000000_m1_semantic_lineage.sql) ([`postgresql-schema-m1.md`](postgresql-schema-m1.md)); direction: [`persistence.md`](persistence.md).
+
+### PostgreSQL mapping (M1 draft — informative)
+
+| Concept (M0 provisional) | Table | Rust API |
+| --- | --- | --- |
+| Document Object | `document_objects` | *Deferred — [#22](https://github.com/zyx-corporation/kotonoha-core/issues/22)* |
+| MeaningState | `meaning_states` | *Deferred — #22* |
+| MeaningDelta (ΔM) | `meaning_deltas` | *Deferred — #22* |
+| RDEAssessment | `rde_assessments` | *Deferred — #22* |
+| ReviewDecision | `review_decisions` | *Deferred — #22* |
+| AgentRun (minimal) | `agent_runs` | *Deferred — #22* |
 
 ## Phase 3 bridge (CLI ingest — informative)
 

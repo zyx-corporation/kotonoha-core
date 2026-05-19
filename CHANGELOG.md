@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 
 - [`docs/repository-governance.md`](docs/repository-governance.md) — informative ecosystem and change-flow summary for implementers.
+- **M1 draft PostgreSQL schema** ([#21](https://github.com/zyx-corporation/kotonoha-core/issues/21)): migration [`20260520000000_m1_semantic_lineage.sql`](migrations/20260520000000_m1_semantic_lineage.sql) and [`docs/postgresql-schema-m1.md`](docs/postgresql-schema-m1.md) (`document_objects`, `meaning_states`, `meaning_deltas`, `rde_assessments`, `review_decisions`, `agent_runs`). Rust insert APIs deferred to [#22](https://github.com/zyx-corporation/kotonoha-core/issues/22).
 
 ## [0.1.6] — 2026-05-10
 

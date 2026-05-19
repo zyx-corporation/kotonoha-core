@@ -26,5 +26,6 @@ Use a dedicated database user with least privilege in real deployments.
 | --- | --- |
 | `20260510000000_v0_init.sql` | Initial tables: `lineage_units`, `rde_documents`, `audit_events`. |
 | `20260510120000_v0_interchange_documents.sql` | Table `interchange_documents` (`kotonoha.interchange.v1` envelope JSONB). |
+| `20260520000000_m1_semantic_lineage.sql` | **M1 draft:** `document_objects`, `meaning_states`, `meaning_deltas`, `rde_assessments`, `review_decisions`, `agent_runs` ([#21](https://github.com/zyx-corporation/kotonoha-core/issues/21)). |
 
-See [`docs/postgresql-schema-v0.md`](../docs/postgresql-schema-v0.md) for column semantics and spec references.
+See [`docs/postgresql-schema-v0.md`](../docs/postgresql-schema-v0.md) and [`docs/postgresql-schema-m1.md`](../docs/postgresql-schema-m1.md) for column semantics.

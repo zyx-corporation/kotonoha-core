@@ -312,4 +312,33 @@ mod postgres_integration_tests {
                 .unwrap();
         assert_eq!(n, 1);
     }
+
+    #[tokio::test]
+    #[ignore = "requires DATABASE_URL and PostgreSQL (run with: cargo test --features postgres -- --include-ignored)"]
+    async fn migrate_applies_m1_semantic_lineage_tables() {
+        let url = database_url_for_integration_test();
+        let store = PgStore::connect(&url).await.expect("connect");
+        store.migrate().await.expect("migrate");
+
+        for table in [
+            "document_objects",
+            "meaning_states",
+            "meaning_deltas",
+            "rde_assessments",
+            "review_decisions",
+            "agent_runs",
+        ] {
+            let exists: bool = sqlx::query_scalar(
+                "SELECT EXISTS (
+                    SELECT 1 FROM information_schema.tables
+                    WHERE table_schema = 'public' AND table_name = $1
+                )",
+            )
+            .bind(table)
+            .fetch_one(store.pool())
+            .await
+            .unwrap_or_else(|e| panic!("check table {table}: {e}"));
+            assert!(exists, "expected public.{table} after M1 migration");
+        }
+    }
 }

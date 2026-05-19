@@ -10,6 +10,7 @@ pub mod interchange;
 pub mod lineage;
 pub mod rde;
 pub mod rde_impl;
+pub mod semantic_lineage;
 
 #[cfg(feature = "postgres")]
 pub mod store;

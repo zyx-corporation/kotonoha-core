@@ -323,6 +323,27 @@ impl PgStore {
         Ok(row.map(meaning_delta_row_from_pg))
     }
 
+    /// Whether M1 `meaning_deltas` table exists (migration applied).
+    pub async fn m1_schema_present(&self) -> Result<bool, StoreError> {
+        let exists: bool = sqlx::query_scalar(
+            "SELECT EXISTS (
+                SELECT 1 FROM information_schema.tables
+                WHERE table_schema = 'public' AND table_name = 'meaning_deltas'
+            )",
+        )
+        .fetch_one(&self.pool)
+        .await?;
+        Ok(exists)
+    }
+
+    /// Count rows in `meaning_deltas` (0 if table missing — call `m1_schema_present` first).
+    pub async fn count_meaning_deltas(&self) -> Result<i64, StoreError> {
+        let n: i64 = sqlx::query_scalar("SELECT COUNT(*)::bigint FROM meaning_deltas")
+            .fetch_one(&self.pool)
+            .await?;
+        Ok(n)
+    }
+
     /// Lists meaning deltas anchored to a Git commit (newest first).
     pub async fn list_meaning_deltas_by_git_commit(
         &self,

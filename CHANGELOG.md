@@ -16,6 +16,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - [`docs/repository-governance.md`](docs/repository-governance.md) — informative ecosystem and change-flow summary for implementers.
 - **M1 draft PostgreSQL schema** ([#21](https://github.com/zyx-corporation/kotonoha-core/issues/21)): migration [`20260520000000_m1_semantic_lineage.sql`](migrations/20260520000000_m1_semantic_lineage.sql) and [`docs/postgresql-schema-m1.md`](docs/postgresql-schema-m1.md) (`document_objects`, `meaning_states`, `meaning_deltas`, `rde_assessments`, `review_decisions`, `agent_runs`). Rust insert APIs deferred to [#22](https://github.com/zyx-corporation/kotonoha-core/issues/22).
 - **M1 PgStore APIs** ([#22](https://github.com/zyx-corporation/kotonoha-core/issues/22)): [`semantic_lineage`](src/semantic_lineage.rs) types; [`PgStore`](src/store/postgres.rs) `create_meaning_delta`, `attach_rde_assessment`, `record_review_decision`, `get_meaning_delta`, `list_meaning_deltas_by_git_commit`.
+- [`git`](src/git.rs) module ([#23](https://github.com/zyx-corporation/kotonoha-core/issues/23)): `discover_repo`, `working_tree_status`, `diff_unstaged`, `path_relative_to_root`.
+
+## [0.1.7] — 2026-05-20
+
+### Added
+
+- M1 semantic lineage draft schema, PgStore APIs, and Git adapter (see [Unreleased] entries above; tagged release bundles M1 work for CLI consumers).
 
 ## [0.1.6] — 2026-05-10
 

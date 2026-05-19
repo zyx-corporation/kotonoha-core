@@ -1,6 +1,6 @@
 [package]
 name = "kotonoha_core"
-version = "0.1.7"
+version = "0.1.8"
 edition = "2021"
 description = "OSS core library for Kotonoha / Semantic Lineage System (SLS)"
 license = "Apache-2.0"

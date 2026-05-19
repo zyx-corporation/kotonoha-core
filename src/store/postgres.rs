@@ -361,6 +361,40 @@ impl PgStore {
         .await?;
         Ok(rows.into_iter().map(meaning_delta_row_from_pg).collect())
     }
+
+    /// Lists RDE assessments for a meaning delta (newest first).
+    pub async fn list_rde_assessments_for_meaning_delta(
+        &self,
+        meaning_delta_id: Uuid,
+    ) -> Result<Vec<RdeAssessmentRow>, StoreError> {
+        let rows = sqlx::query(
+            r#"SELECT id, meaning_delta_id, payload, audit_correlation_id, rde_document_id
+               FROM rde_assessments
+               WHERE meaning_delta_id = $1
+               ORDER BY created_at DESC"#,
+        )
+        .bind(meaning_delta_id)
+        .fetch_all(&self.pool)
+        .await?;
+        Ok(rows.into_iter().map(rde_assessment_row_from_pg).collect())
+    }
+
+    /// Lists review decisions for a meaning delta (newest first).
+    pub async fn list_review_decisions_for_meaning_delta(
+        &self,
+        meaning_delta_id: Uuid,
+    ) -> Result<Vec<ReviewDecisionRow>, StoreError> {
+        let rows = sqlx::query(
+            r#"SELECT id, meaning_delta_id, rde_assessment_id, decision, decided_by, rationale
+               FROM review_decisions
+               WHERE meaning_delta_id = $1
+               ORDER BY created_at DESC"#,
+        )
+        .bind(meaning_delta_id)
+        .fetch_all(&self.pool)
+        .await?;
+        Ok(rows.into_iter().map(review_decision_row_from_pg).collect())
+    }
 }
 
 fn meaning_delta_row_from_pg(row: sqlx::postgres::PgRow) -> MeaningDeltaRow {
@@ -388,6 +422,50 @@ pub struct MeaningDeltaRow {
     pub diff_ref: Option<String>,
     pub observation: serde_json::Value,
     pub source_context: serde_json::Value,
+}
+
+/// Row returned by [`PgStore::list_rde_assessments_for_meaning_delta`].
+#[derive(Debug, Clone)]
+pub struct RdeAssessmentRow {
+    pub id: Uuid,
+    pub meaning_delta_id: Uuid,
+    pub payload: serde_json::Value,
+    pub audit_correlation_id: Option<String>,
+    pub rde_document_id: Option<Uuid>,
+}
+
+/// Row returned by [`PgStore::list_review_decisions_for_meaning_delta`].
+#[derive(Debug, Clone)]
+pub struct ReviewDecisionRow {
+    pub id: Uuid,
+    pub meaning_delta_id: Uuid,
+    pub rde_assessment_id: Option<Uuid>,
+    pub decision: String,
+    pub decided_by: String,
+    pub rationale: serde_json::Value,
+}
+
+fn rde_assessment_row_from_pg(row: sqlx::postgres::PgRow) -> RdeAssessmentRow {
+    use sqlx::Row;
+    RdeAssessmentRow {
+        id: row.get("id"),
+        meaning_delta_id: row.get("meaning_delta_id"),
+        payload: row.get::<Json<serde_json::Value>, _>("payload").0,
+        audit_correlation_id: row.get("audit_correlation_id"),
+        rde_document_id: row.get("rde_document_id"),
+    }
+}
+
+fn review_decision_row_from_pg(row: sqlx::postgres::PgRow) -> ReviewDecisionRow {
+    use sqlx::Row;
+    ReviewDecisionRow {
+        id: row.get("id"),
+        meaning_delta_id: row.get("meaning_delta_id"),
+        rde_assessment_id: row.get("rde_assessment_id"),
+        decision: row.get("decision"),
+        decided_by: row.get("decided_by"),
+        rationale: row.get::<Json<serde_json::Value>, _>("rationale").0,
+    }
 }
 
 #[cfg(all(test, feature = "postgres"))]
@@ -606,13 +684,18 @@ mod postgres_integration_tests {
         assert_eq!(listed.len(), 1);
         assert_eq!(listed[0].id, delta_id);
 
-        let n: i64 = sqlx::query_scalar(
-            "SELECT COUNT(*)::bigint FROM review_decisions WHERE meaning_delta_id = $1",
-        )
-        .bind(delta_id)
-        .fetch_one(store.pool())
-        .await
-        .unwrap();
-        assert_eq!(n, 1);
+        let assessments = store
+            .list_rde_assessments_for_meaning_delta(delta_id)
+            .await
+            .expect("list assessments");
+        assert_eq!(assessments.len(), 1);
+        assert_eq!(assessments[0].id, assessment_id);
+
+        let decisions = store
+            .list_review_decisions_for_meaning_delta(delta_id)
+            .await
+            .expect("list decisions");
+        assert_eq!(decisions.len(), 1);
+        assert_eq!(decisions[0].decision, "approve");
     }
 }

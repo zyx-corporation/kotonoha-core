@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- `PgStore::list_rde_assessments_for_meaning_delta`, `list_review_decisions_for_meaning_delta` — support CLI M1 export ([#15](https://github.com/zyx-corporation/kotonoha-cli/issues/15)).
+
 ### Changed
 
 - [`docs/spec-traceability.md`](docs/spec-traceability.md) — [`representation-of-loss.md`](https://github.com/zyx-corporation/kotonoha-spec/blob/main/docs/representation-of-loss.md) mapping now cites public tracking **[`kotonoha-spec#3`](https://github.com/zyx-corporation/kotonoha-spec/issues/3)** for optional normative follow-up beyond the RDE `lost` pathway.

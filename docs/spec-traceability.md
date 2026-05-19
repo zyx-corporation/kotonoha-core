@@ -60,12 +60,13 @@ DDL sketches: [`migrations/`](../migrations/) — baseline [`20260510000000_v0_i
 
 | Concept (M0 provisional) | Table | Rust API |
 | --- | --- | --- |
-| Document Object | `document_objects` | *Deferred — [#22](https://github.com/zyx-corporation/kotonoha-core/issues/22)* |
-| MeaningState | `meaning_states` | *Deferred — #22* |
-| MeaningDelta (ΔM) | `meaning_deltas` | *Deferred — #22* |
-| RDEAssessment | `rde_assessments` | *Deferred — #22* |
-| ReviewDecision | `review_decisions` | *Deferred — #22* |
-| AgentRun (minimal) | `agent_runs` | *Deferred — #22* |
+| Document Object | `document_objects` | *Deferred (insert helper)* |
+| MeaningState | `meaning_states` | *Deferred (insert helper)* |
+| MeaningDelta (ΔM) | `meaning_deltas` | [`semantic_lineage::MeaningDeltaInput`](../src/semantic_lineage.rs), [`PgStore::create_meaning_delta`](../src/store/postgres.rs) |
+| RDEAssessment | `rde_assessments` | [`PgStore::attach_rde_assessment`](../src/store/postgres.rs) |
+| ReviewDecision | `review_decisions` | [`semantic_lineage::RecordReviewDecisionInput`](../src/semantic_lineage.rs), [`PgStore::record_review_decision`](../src/store/postgres.rs) |
+| AgentRun (minimal) | `agent_runs` | *Deferred* |
+| Query by Git commit | `meaning_deltas.git_commit` | [`PgStore::list_meaning_deltas_by_git_commit`](../src/store/postgres.rs), [`MeaningDeltaRow`](../src/store/postgres.rs) |
 
 ## Phase 3 bridge (CLI ingest — informative)
 

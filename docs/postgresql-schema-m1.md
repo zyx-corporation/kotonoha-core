@@ -105,8 +105,7 @@ Or `PgStore::migrate()` from Rust (`postgres` feature).
 
 ---
 
-## Next (M1-b / #22)
+## Next
 
-- Rust insert/query APIs on these tables.
-- Validate `observation` / `payload` shapes against project conventions before insert.
-- Git adapter populates anchor columns ([#23](https://github.com/zyx-corporation/kotonoha-core/issues/23)).
+- **M1-b ([#22](https://github.com/zyx-corporation/kotonoha-core/issues/22)):** `PgStore::create_meaning_delta`, `attach_rde_assessment`, `record_review_decision`, `get_meaning_delta`, `list_meaning_deltas_by_git_commit` — see [`semantic_lineage.rs`](../src/semantic_lineage.rs).
+- **M1-c ([#23](https://github.com/zyx-corporation/kotonoha-core/issues/23)):** Git adapter populates [`GitAnchor`](../src/semantic_lineage.rs) for CLI.

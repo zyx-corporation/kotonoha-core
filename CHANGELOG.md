@@ -6,27 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-### Added
-
-- `PgStore::list_rde_assessments_for_meaning_delta`, `list_review_decisions_for_meaning_delta` — support CLI M1 export ([#15](https://github.com/zyx-corporation/kotonoha-cli/issues/15)).
-
-### Changed
-
-- [`docs/spec-traceability.md`](docs/spec-traceability.md) — [`representation-of-loss.md`](https://github.com/zyx-corporation/kotonoha-spec/blob/main/docs/representation-of-loss.md) mapping now cites public tracking **[`kotonoha-spec#3`](https://github.com/zyx-corporation/kotonoha-spec/issues/3)** for optional normative follow-up beyond the RDE `lost` pathway.
-- [`CONTRIBUTING.md`](CONTRIBUTING.md) — PR guidance for linking that issue when expanding loss semantics.
+## [0.1.8] — 2026-05-20
 
 ### Added
 
-- [`docs/repository-governance.md`](docs/repository-governance.md) — informative ecosystem and change-flow summary for implementers.
-- **M1 draft PostgreSQL schema** ([#21](https://github.com/zyx-corporation/kotonoha-core/issues/21)): migration [`20260520000000_m1_semantic_lineage.sql`](migrations/20260520000000_m1_semantic_lineage.sql) and [`docs/postgresql-schema-m1.md`](docs/postgresql-schema-m1.md) (`document_objects`, `meaning_states`, `meaning_deltas`, `rde_assessments`, `review_decisions`, `agent_runs`). Rust insert APIs deferred to [#22](https://github.com/zyx-corporation/kotonoha-core/issues/22).
-- **M1 PgStore APIs** ([#22](https://github.com/zyx-corporation/kotonoha-core/issues/22)): [`semantic_lineage`](src/semantic_lineage.rs) types; [`PgStore`](src/store/postgres.rs) `create_meaning_delta`, `attach_rde_assessment`, `record_review_decision`, `get_meaning_delta`, `list_meaning_deltas_by_git_commit`.
-- [`git`](src/git.rs) module ([#23](https://github.com/zyx-corporation/kotonoha-core/issues/23)): `discover_repo`, `working_tree_status`, `diff_unstaged`, `path_relative_to_root`.
+- `PgStore::list_rde_assessments_for_meaning_delta`, `list_review_decisions_for_meaning_delta` — CLI M1 `export` ([#28](https://github.com/zyx-corporation/kotonoha-core/pull/28), [cli#15](https://github.com/zyx-corporation/kotonoha-cli/issues/15)).
 
 ## [0.1.7] — 2026-05-20
 
 ### Added
 
-- M1 semantic lineage draft schema, PgStore APIs, and Git adapter (see [Unreleased] entries above; tagged release bundles M1 work for CLI consumers).
+- [`docs/repository-governance.md`](docs/repository-governance.md) — informative ecosystem and change-flow summary for implementers.
+- **M1 draft PostgreSQL schema** ([#21](https://github.com/zyx-corporation/kotonoha-core/issues/21)): migration [`20260520000000_m1_semantic_lineage.sql`](migrations/20260520000000_m1_semantic_lineage.sql) and [`docs/postgresql-schema-m1.md`](docs/postgresql-schema-m1.md).
+- **M1 PgStore APIs** ([#22](https://github.com/zyx-corporation/kotonoha-core/issues/22)): `create_meaning_delta`, `attach_rde_assessment`, `record_review_decision`, `get_meaning_delta`, `list_meaning_deltas_by_git_commit`.
+- [`git`](src/git.rs) module ([#23](https://github.com/zyx-corporation/kotonoha-core/issues/23)): `discover_repo`, `working_tree_status`, `diff_unstaged`, `path_relative_to_root`.
+
+### Changed
+
+- [`docs/spec-traceability.md`](docs/spec-traceability.md) — `representation-of-loss` mapping cites [`kotonoha-spec#3`](https://github.com/zyx-corporation/kotonoha-spec/issues/3).
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — PR guidance for loss-semantics follow-up.
 
 ## [0.1.6] — 2026-05-10
 

@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [0.1.9] — 2026-05-22
 
+### Added (tests)
+
+- M2 unit tests: `rde_attach` strict/warn, `observation_rde` mapping; postgres integration `migrate_applies_m2_*` (see [`docs/unit_testing_guidelines_ja.md`](docs/unit_testing_guidelines_ja.md)).
+
 ### Added
 
 - **M2 RDE metadata** ([#29](https://github.com/zyx-corporation/kotonoha-core/issues/29)): migration [`20260522000000_m2_rde_meta.sql`](migrations/20260522000000_m2_rde_meta.sql) — `payload_schema_version`, `source_kind`, `validation_report` on `rde_assessments`.

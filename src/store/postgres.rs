@@ -11,7 +11,8 @@ use crate::interchange::{self, InterchangeDocument};
 use crate::lineage::{LineageUnit, LineageValidationError};
 use crate::rde;
 use crate::rde_attach::{
-    build_validation_report, payload_schema_version_from_payload, RdeSourceKind,
+    build_validation_report, payload_schema_version_from_payload, validate_rde_payload_for_attach,
+    RdeSourceKind,
 };
 use crate::semantic_lineage::{MeaningDeltaInput, RecordReviewDecisionInput, SemanticLineageError};
 
@@ -92,19 +93,7 @@ fn validate_rde_payload(
     payload: &serde_json::Value,
     strict_rde: bool,
 ) -> Result<Vec<String>, StoreError> {
-    if payload.get("rde_review_output").is_none() {
-        return Ok(Vec::new());
-    }
-    let json = serde_json::to_string(payload)?;
-    let warnings = rde::validate_json(&json, strict_rde).map_err(StoreError::RdeValidation)?;
-    if strict_rde && !warnings.is_empty() {
-        return Err(StoreError::RdeValidation(format!(
-            "strict RDE validation failed with {} warning(s): {}",
-            warnings.len(),
-            warnings.join("; ")
-        )));
-    }
-    Ok(warnings)
+    validate_rde_payload_for_attach(payload, strict_rde).map_err(StoreError::RdeValidation)
 }
 
 async fn insert_lineage_unit_ex<'e, E>(e: E, unit: &LineageUnit) -> Result<(), StoreError>
@@ -822,6 +811,28 @@ mod postgres_integration_tests {
 
     #[tokio::test]
     #[ignore = "requires DATABASE_URL and PostgreSQL (run with: cargo test --features postgres -- --include-ignored)"]
+    async fn migrate_applies_m2_rde_meta_columns() {
+        let url = database_url_for_integration_test();
+        let store = PgStore::connect(&url).await.expect("connect");
+        store.migrate().await.expect("migrate");
+        assert!(store.m2_schema_present().await.expect("m2 check"));
+        for col in ["payload_schema_version", "source_kind", "validation_report"] {
+            let exists: bool = sqlx::query_scalar(
+                "SELECT EXISTS (
+                    SELECT 1 FROM information_schema.columns
+                    WHERE table_schema = 'public'
+                      AND table_name = 'rde_assessments'
+                      AND column_name = $1
+                )",
+            )
+            .bind(col)
+            .fetch_one(store.pool())
+            .await
+            .unwrap_or_else(|e| panic!("column {col}: {e}"));
+            assert!(exists, "expected rde_assessments.{col}");
+        }
+    }
+
     async fn m2_validate_and_attach_stores_meta() {
         use crate::rde_attach::RdeSourceKind;
         use crate::semantic_lineage::{GitAnchor, MeaningDeltaInput};

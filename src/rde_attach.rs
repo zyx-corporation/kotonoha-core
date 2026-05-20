@@ -1,5 +1,6 @@
 //! RDE attach helpers: validation reports and source-kind labels (M2).
 
+use crate::rde;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
@@ -49,6 +50,28 @@ pub fn build_validation_report(strict: bool, warnings: &[String]) -> Value {
     })
 }
 
+/// Validates payload before attach. Returns RDE **warnings** when `strict` is false.
+///
+/// When `strict` is true, non-empty warnings are treated as failure (M2 trust boundary).
+pub fn validate_rde_payload_for_attach(
+    payload: &Value,
+    strict_rde: bool,
+) -> Result<Vec<String>, String> {
+    if payload.get("rde_review_output").is_none() {
+        return Ok(Vec::new());
+    }
+    let json = serde_json::to_string(payload).map_err(|e| format!("payload JSON: {e}"))?;
+    let warnings = rde::validate_json(&json, strict_rde)?;
+    if strict_rde && !warnings.is_empty() {
+        return Err(format!(
+            "strict RDE validation failed with {} warning(s): {}",
+            warnings.len(),
+            warnings.join("; ")
+        ));
+    }
+    Ok(warnings)
+}
+
 /// Extract `spec_version` from an RDE payload when `rde_review_output` is present.
 pub fn payload_schema_version_from_payload(payload: &Value) -> Option<String> {
     payload
@@ -73,5 +96,70 @@ mod tests {
         let r = build_validation_report(false, &["warn a".into()]);
         assert_eq!(r["warning_count"], 1);
         assert_eq!(r["strict"], false);
+    }
+
+    #[test]
+    fn payload_schema_version_reads_spec_version() {
+        let p = json!({
+            "rde_review_output": {
+                "spec_version": "0.1",
+                "subject_ref": "https://example.invalid/x",
+                "categories": {
+                    "preserved": [],
+                    "transformed": [],
+                    "complemented": [],
+                    "intentionally_unresolved": [],
+                    "lost": [],
+                    "deviation_risk": [],
+                    "next_update_policy": []
+                }
+            }
+        });
+        assert_eq!(
+            payload_schema_version_from_payload(&p).as_deref(),
+            Some("0.1")
+        );
+    }
+
+    #[test]
+    fn strict_attach_rejects_summary_warnings() {
+        let p = json!({
+            "rde_review_output": {
+                "spec_version": "0.1",
+                "subject_ref": "https://example.invalid/x",
+                "categories": {
+                    "preserved": [{}],
+                    "transformed": [],
+                    "complemented": [],
+                    "intentionally_unresolved": [],
+                    "lost": [],
+                    "deviation_risk": [],
+                    "next_update_policy": []
+                }
+            }
+        });
+        assert!(validate_rde_payload_for_attach(&p, true).is_err());
+    }
+
+    #[test]
+    fn non_strict_attach_collects_summary_warnings() {
+        let p = json!({
+            "rde_review_output": {
+                "spec_version": "0.1",
+                "subject_ref": "https://example.invalid/x",
+                "categories": {
+                    "preserved": [{}],
+                    "transformed": [],
+                    "complemented": [],
+                    "intentionally_unresolved": [],
+                    "lost": [],
+                    "deviation_risk": [],
+                    "next_update_policy": []
+                }
+            }
+        });
+        assert!(!validate_rde_payload_for_attach(&p, false)
+            .unwrap()
+            .is_empty());
     }
 }

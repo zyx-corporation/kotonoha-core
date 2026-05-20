@@ -156,6 +156,14 @@ mod tests {
     }
 
     #[test]
+    fn maps_transformed_key() {
+        let r = map_observation_to_rde_hints(&json!({ "transformed": "rewritten scope" }));
+        assert_eq!(r.hints.len(), 1);
+        assert_eq!(r.hints[0].category, RdeCategoryKey::Transformed);
+        assert_eq!(r.hints[0].hints, vec!["rewritten scope"]);
+    }
+
+    #[test]
     fn unresolved_alias_maps_to_intentionally_unresolved() {
         let r = map_observation_to_rde_hints(&json!({ "unresolved": "open question" }));
         assert_eq!(r.hints.len(), 1);

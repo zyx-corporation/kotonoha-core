@@ -54,7 +54,15 @@ CLI surface contracts: [`kotonoha-cli` `cli-definition.md`](https://github.com/z
 | `SLS-7` abstract audit correlation | [`src/store/postgres.rs`](../src/store/postgres.rs) — optional feature **`postgres`**: pool, migrations, append-only `audit_events`, validated `rde_documents` / `lineage_units` inserts |
 | *(non-normative envelope persistence)* | Same — **`insert_interchange_document_json`** → **`interchange_documents`** plus optional **`lineage_units`** / **`rde_documents`** in one transaction ([`interchange.rs`](../src/interchange.rs) validation rules) |
 
-DDL sketches: [`migrations/`](../migrations/) — baseline [`20260510000000_v0_init.sql`](../migrations/20260510000000_v0_init.sql), interchange [`20260510120000_v0_interchange_documents.sql`](../migrations/20260510120000_v0_interchange_documents.sql), M1 draft [`20260520000000_m1_semantic_lineage.sql`](../migrations/20260520000000_m1_semantic_lineage.sql) ([`postgresql-schema-m1.md`](postgresql-schema-m1.md)); direction: [`persistence.md`](persistence.md).
+DDL sketches: [`migrations/`](../migrations/) — baseline [`20260510000000_v0_init.sql`](../migrations/20260510000000_v0_init.sql), interchange [`20260510120000_v0_interchange_documents.sql`](../migrations/20260510120000_v0_interchange_documents.sql), M1 draft [`20260520000000_m1_semantic_lineage.sql`](../migrations/20260520000000_m1_semantic_lineage.sql) ([`postgresql-schema-m1.md`](postgresql-schema-m1.md)), M2 [`20260522000000_m2_rde_meta.sql`](../migrations/20260522000000_m2_rde_meta.sql) ([`postgresql-schema-m2.md`](postgresql-schema-m2.md)); direction: [`persistence.md`](persistence.md).
+
+### PostgreSQL mapping (M2 — informative)
+
+| Concept | Table / column | Rust module |
+| --- | --- | --- |
+| RDE attach metadata | `rde_assessments.payload_schema_version`, `source_kind`, `validation_report` | [`rde_attach.rs`](../src/rde_attach.rs), [`PgStore::validate_and_attach_rde`](../src/store/postgres.rs) |
+| Observation → RDE hints (non-normative) | — | [`observation_rde.rs`](../src/observation_rde.rs) — `map_observation_to_rde_hints` |
+| M2 export contract (CLI) | — | [`kotonoha-cli` `export --format m2`](https://github.com/zyx-corporation/kotonoha-cli/blob/main/docs/cli-definition.md); tests: `tests/m2_integration.rs` |
 
 ### PostgreSQL mapping (M1 draft — informative)
 

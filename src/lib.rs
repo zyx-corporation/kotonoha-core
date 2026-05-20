@@ -9,7 +9,9 @@ pub const TARGET_SPEC_BUNDLE: &str = "0.1";
 pub mod git;
 pub mod interchange;
 pub mod lineage;
+pub mod observation_rde;
 pub mod rde;
+pub mod rde_attach;
 pub mod rde_impl;
 pub mod semantic_lineage;
 

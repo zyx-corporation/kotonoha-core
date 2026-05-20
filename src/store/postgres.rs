@@ -10,6 +10,10 @@ use uuid::Uuid;
 use crate::interchange::{self, InterchangeDocument};
 use crate::lineage::{LineageUnit, LineageValidationError};
 use crate::rde;
+use crate::rde_attach::{
+    build_validation_report, payload_schema_version_from_payload, validate_rde_payload_for_attach,
+    RdeSourceKind,
+};
 use crate::semantic_lineage::{MeaningDeltaInput, RecordReviewDecisionInput, SemanticLineageError};
 
 /// Pool wrapper around the v0 schema (`migrations/`).
@@ -66,6 +70,30 @@ impl From<serde_json::Error> for StoreError {
     fn from(e: serde_json::Error) -> Self {
         StoreError::Json(e)
     }
+}
+
+/// Optional M2 metadata for [`PgStore::attach_rde_assessment`].
+#[derive(Debug, Clone, Default)]
+pub struct AttachRdeAssessmentMeta {
+    pub source_kind: Option<RdeSourceKind>,
+    pub payload_schema_version: Option<String>,
+    pub validation_report: Option<serde_json::Value>,
+}
+
+/// Result of [`PgStore::validate_and_attach_rde`].
+#[derive(Debug, Clone)]
+pub struct ValidateAndAttachRdeResult {
+    pub assessment_id: Uuid,
+    pub validation_report: serde_json::Value,
+    pub payload_schema_version: Option<String>,
+    pub source_kind: RdeSourceKind,
+}
+
+fn validate_rde_payload(
+    payload: &serde_json::Value,
+    strict_rde: bool,
+) -> Result<Vec<String>, StoreError> {
+    validate_rde_payload_for_attach(payload, strict_rde).map_err(StoreError::RdeValidation)
 }
 
 async fn insert_lineage_unit_ex<'e, E>(e: E, unit: &LineageUnit) -> Result<(), StoreError>
@@ -241,11 +269,51 @@ impl PgStore {
         Ok(id)
     }
 
+    /// Validates RDE JSON, builds a [`validation_report`](AttachRdeAssessmentMeta::validation_report), and inserts in one transaction.
+    ///
+    /// When `strict_rde` is true, interchange `SHOULD` warnings cause attach to fail (no row inserted).
+    pub async fn validate_and_attach_rde(
+        &self,
+        meaning_delta_id: Uuid,
+        payload: serde_json::Value,
+        strict_rde: bool,
+        source_kind: RdeSourceKind,
+        audit_correlation_id: Option<&str>,
+        materialize_rde_document: bool,
+    ) -> Result<ValidateAndAttachRdeResult, StoreError> {
+        let warnings = validate_rde_payload(&payload, strict_rde)?;
+        let validation_report = build_validation_report(strict_rde, &warnings);
+        let payload_schema_version = payload_schema_version_from_payload(&payload);
+        let meta = AttachRdeAssessmentMeta {
+            source_kind: Some(source_kind),
+            payload_schema_version: payload_schema_version.clone(),
+            validation_report: Some(validation_report.clone()),
+        };
+        let assessment_id = self
+            .attach_rde_assessment(
+                meaning_delta_id,
+                payload,
+                strict_rde,
+                audit_correlation_id,
+                materialize_rde_document,
+                Some(meta),
+            )
+            .await?;
+        Ok(ValidateAndAttachRdeResult {
+            assessment_id,
+            validation_report,
+            payload_schema_version,
+            source_kind,
+        })
+    }
+
     /// Stores an RDE evaluation JSONB on `rde_assessments`.
     ///
     /// When `payload` contains `rde_review_output`, validates via [`rde::validate_json`].
     /// If `materialize_rde_document` is true and validation succeeds, also inserts `rde_documents`
     /// and sets `rde_assessments.rde_document_id`.
+    ///
+    /// Pass [`AttachRdeAssessmentMeta`] when M2 columns are populated (see [`Self::validate_and_attach_rde`]).
     pub async fn attach_rde_assessment(
         &self,
         meaning_delta_id: Uuid,
@@ -253,25 +321,40 @@ impl PgStore {
         strict_rde: bool,
         audit_correlation_id: Option<&str>,
         materialize_rde_document: bool,
+        meta: Option<AttachRdeAssessmentMeta>,
     ) -> Result<Uuid, StoreError> {
         if payload.get("rde_review_output").is_some() {
-            let json = serde_json::to_string(&payload)?;
-            rde::validate_json(&json, strict_rde).map_err(StoreError::RdeValidation)?;
+            validate_rde_payload(&payload, strict_rde)?;
         } else if !payload.is_object() {
             return Err(StoreError::RdeValidation(
                 "rde assessment payload must be a JSON object".into(),
             ));
         }
 
+        let source_kind = meta
+            .as_ref()
+            .and_then(|m| m.source_kind)
+            .map(|k| k.as_db_str().to_string());
+        let payload_schema_version = meta
+            .as_ref()
+            .and_then(|m| m.payload_schema_version.clone())
+            .or_else(|| payload_schema_version_from_payload(&payload));
+        let validation_report = meta.as_ref().and_then(|m| m.validation_report.clone());
+
         let mut tx = self.pool.begin().await?;
         let assessment_id = sqlx::query_scalar::<_, Uuid>(
-            r#"INSERT INTO rde_assessments (meaning_delta_id, payload, audit_correlation_id)
-               VALUES ($1, $2::jsonb, $3)
-               RETURNING id"#,
+            r#"INSERT INTO rde_assessments (
+                meaning_delta_id, payload, audit_correlation_id,
+                payload_schema_version, source_kind, validation_report
+            ) VALUES ($1, $2::jsonb, $3, $4, $5, $6::jsonb)
+            RETURNING id"#,
         )
         .bind(meaning_delta_id)
         .bind(Json(payload.clone()))
         .bind(audit_correlation_id)
+        .bind(payload_schema_version)
+        .bind(source_kind)
+        .bind(validation_report.map(Json))
         .fetch_one(&mut *tx)
         .await?;
 
@@ -323,6 +406,21 @@ impl PgStore {
         Ok(row.map(meaning_delta_row_from_pg))
     }
 
+    /// Whether M2 `rde_assessments.source_kind` column exists.
+    pub async fn m2_schema_present(&self) -> Result<bool, StoreError> {
+        let exists: bool = sqlx::query_scalar(
+            "SELECT EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_schema = 'public'
+                  AND table_name = 'rde_assessments'
+                  AND column_name = 'source_kind'
+            )",
+        )
+        .fetch_one(&self.pool)
+        .await?;
+        Ok(exists)
+    }
+
     /// Whether M1 `meaning_deltas` table exists (migration applied).
     pub async fn m1_schema_present(&self) -> Result<bool, StoreError> {
         let exists: bool = sqlx::query_scalar(
@@ -368,7 +466,8 @@ impl PgStore {
         meaning_delta_id: Uuid,
     ) -> Result<Vec<RdeAssessmentRow>, StoreError> {
         let rows = sqlx::query(
-            r#"SELECT id, meaning_delta_id, payload, audit_correlation_id, rde_document_id
+            r#"SELECT id, meaning_delta_id, payload, audit_correlation_id, rde_document_id,
+                      payload_schema_version, source_kind, validation_report
                FROM rde_assessments
                WHERE meaning_delta_id = $1
                ORDER BY created_at DESC"#,
@@ -432,6 +531,9 @@ pub struct RdeAssessmentRow {
     pub payload: serde_json::Value,
     pub audit_correlation_id: Option<String>,
     pub rde_document_id: Option<Uuid>,
+    pub payload_schema_version: Option<String>,
+    pub source_kind: Option<String>,
+    pub validation_report: Option<serde_json::Value>,
 }
 
 /// Row returned by [`PgStore::list_review_decisions_for_meaning_delta`].
@@ -447,12 +549,20 @@ pub struct ReviewDecisionRow {
 
 fn rde_assessment_row_from_pg(row: sqlx::postgres::PgRow) -> RdeAssessmentRow {
     use sqlx::Row;
+    let validation_report = row
+        .try_get::<Option<Json<serde_json::Value>>, _>("validation_report")
+        .ok()
+        .flatten()
+        .map(|j| j.0);
     RdeAssessmentRow {
         id: row.get("id"),
         meaning_delta_id: row.get("meaning_delta_id"),
         payload: row.get::<Json<serde_json::Value>, _>("payload").0,
         audit_correlation_id: row.get("audit_correlation_id"),
         rde_document_id: row.get("rde_document_id"),
+        payload_schema_version: row.try_get("payload_schema_version").unwrap_or(None),
+        source_kind: row.try_get("source_kind").unwrap_or(None),
+        validation_report,
     }
 }
 
@@ -654,7 +764,7 @@ mod postgres_integration_tests {
             }
         });
         let assessment_id = store
-            .attach_rde_assessment(delta_id, rde_payload, false, Some(&subject), true)
+            .attach_rde_assessment(delta_id, rde_payload, false, Some(&subject), true, None)
             .await
             .expect("attach_rde_assessment");
 
@@ -697,5 +807,160 @@ mod postgres_integration_tests {
             .expect("list decisions");
         assert_eq!(decisions.len(), 1);
         assert_eq!(decisions[0].decision, "approve");
+    }
+
+    #[tokio::test]
+    #[ignore = "requires DATABASE_URL and PostgreSQL (run with: cargo test --features postgres -- --include-ignored)"]
+    async fn migrate_applies_m2_rde_meta_columns() {
+        let url = database_url_for_integration_test();
+        let store = PgStore::connect(&url).await.expect("connect");
+        store.migrate().await.expect("migrate");
+        assert!(store.m2_schema_present().await.expect("m2 check"));
+        for col in ["payload_schema_version", "source_kind", "validation_report"] {
+            let exists: bool = sqlx::query_scalar(
+                "SELECT EXISTS (
+                    SELECT 1 FROM information_schema.columns
+                    WHERE table_schema = 'public'
+                      AND table_name = 'rde_assessments'
+                      AND column_name = $1
+                )",
+            )
+            .bind(col)
+            .fetch_one(store.pool())
+            .await
+            .unwrap_or_else(|e| panic!("column {col}: {e}"));
+            assert!(exists, "expected rde_assessments.{col}");
+        }
+    }
+
+    async fn m2_validate_and_attach_stores_meta() {
+        use crate::rde_attach::RdeSourceKind;
+        use crate::semantic_lineage::{GitAnchor, MeaningDeltaInput};
+
+        let url = database_url_for_integration_test();
+        let store = PgStore::connect(&url).await.expect("connect");
+        store.migrate().await.expect("migrate");
+        assert!(store.m2_schema_present().await.expect("m2 check"));
+
+        let commit = uuid::Uuid::new_v4().to_string().replace('-', "");
+        let delta_id = store
+            .create_meaning_delta(&MeaningDeltaInput {
+                document_object_id: None,
+                prior_meaning_state_id: None,
+                new_meaning_state_id: None,
+                agent_run_id: None,
+                git_anchor: GitAnchor {
+                    git_commit: commit,
+                    file_path: "docs/m2.md".into(),
+                    line_range_start: Some(1),
+                    line_range_end: Some(2),
+                    diff_ref: None,
+                },
+                observation: serde_json::json!({ "preserved": ["intent"] }),
+                source_context: serde_json::json!({}),
+            })
+            .await
+            .expect("delta");
+
+        let subject = format!("https://example.invalid/m2-itest/{}", uuid::Uuid::new_v4());
+        let rde_payload = serde_json::json!({
+            "rde_review_output": {
+                "spec_version": TARGET_SPEC_BUNDLE,
+                "subject_ref": subject,
+                "categories": {
+                    "preserved": [],
+                    "transformed": [],
+                    "complemented": [],
+                    "intentionally_unresolved": [],
+                    "lost": [],
+                    "deviation_risk": [],
+                    "next_update_policy": []
+                }
+            }
+        });
+
+        let result = store
+            .validate_and_attach_rde(
+                delta_id,
+                rde_payload,
+                false,
+                RdeSourceKind::Cli,
+                Some("m2-itest"),
+                false,
+            )
+            .await
+            .expect("validate_and_attach");
+
+        let assessments = store
+            .list_rde_assessments_for_meaning_delta(delta_id)
+            .await
+            .expect("list");
+        assert_eq!(assessments.len(), 1);
+        let row = &assessments[0];
+        assert_eq!(row.id, result.assessment_id);
+        assert_eq!(row.source_kind.as_deref(), Some("cli"));
+        assert_eq!(
+            row.payload_schema_version.as_deref(),
+            Some(TARGET_SPEC_BUNDLE)
+        );
+        assert!(row.validation_report.is_some());
+    }
+
+    #[tokio::test]
+    #[ignore = "requires DATABASE_URL and PostgreSQL (run with: cargo test --features postgres -- --include-ignored)"]
+    async fn m2_strict_attach_rolls_back_on_warnings() {
+        use crate::rde_attach::RdeSourceKind;
+        use crate::semantic_lineage::{GitAnchor, MeaningDeltaInput};
+
+        let url = database_url_for_integration_test();
+        let store = PgStore::connect(&url).await.expect("connect");
+        store.migrate().await.expect("migrate");
+
+        let delta_id = store
+            .create_meaning_delta(&MeaningDeltaInput {
+                document_object_id: None,
+                prior_meaning_state_id: None,
+                new_meaning_state_id: None,
+                agent_run_id: None,
+                git_anchor: GitAnchor {
+                    git_commit: "abc".into(),
+                    file_path: "f.md".into(),
+                    line_range_start: Some(1),
+                    line_range_end: Some(1),
+                    diff_ref: None,
+                },
+                observation: serde_json::json!({}),
+                source_context: serde_json::json!({}),
+            })
+            .await
+            .expect("delta");
+
+        let rde_payload = serde_json::json!({
+            "rde_review_output": {
+                "spec_version": TARGET_SPEC_BUNDLE,
+                "subject_ref": "https://example.invalid/strict",
+                "categories": {
+                    "preserved": [{}],
+                    "transformed": [],
+                    "complemented": [],
+                    "intentionally_unresolved": [],
+                    "lost": [],
+                    "deviation_risk": [],
+                    "next_update_policy": []
+                }
+            }
+        });
+
+        let err = store
+            .validate_and_attach_rde(delta_id, rde_payload, true, RdeSourceKind::Cli, None, false)
+            .await
+            .expect_err("strict should fail");
+        assert!(matches!(err, StoreError::RdeValidation(_)));
+
+        let assessments = store
+            .list_rde_assessments_for_meaning_delta(delta_id)
+            .await
+            .expect("list");
+        assert!(assessments.is_empty());
     }
 }

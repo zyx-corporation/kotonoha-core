@@ -22,13 +22,14 @@
 
 ---
 
-## 2. `kotonoha-core` の現状（2026-05-11 時点での観察）
+## 2. `kotonoha-core` の現状（2026-05-22 時点での観察）
 
 | 項目 | 状況 |
 | --- | --- |
-| **`lineage`／`rde`／`interchange`** のライブラリテスト | 各 `*.rs` モジュール内に **計 30 本**（許容／拒否／strict・**エンベロープと lineage／RDE の形状 Negative** を中心） |
-| **PostgreSQL 経路** | **`feature = postgres`** かつ **`#[ignore]`** 付き非同期テストが **計 2 本**。通常の `cargo test` では除外され、`DATABASE_URL` と `--include-ignored` が揃ったときのみ意味を持つ |
-| **`tests/` ディレクトリ**による Rust インテグレーション | **未定義**（フェーズ検証経路として、将来コードハーネスを追加しうる） |
+| **`lineage`／`rde`／`interchange`** のライブラリテスト | 各 `*.rs` モジュール内（許容／拒否／strict・**エンベロープと lineage／RDE の形状 Negative** を中心） |
+| **M2**（`rde_attach`／`observation_rde`） | 単体: strict 拒否・`source_kind` パース・observation マッピング Positive/Negative。**統合**: `postgres.rs` 内 `migrate_applies_m2_*`／`m2_validate_and_attach_*`（`#[ignore]`、`DATABASE_URL` + `--include-ignored`） |
+| **PostgreSQL 経路** | **`feature = postgres`** かつ **`#[ignore]`** 付き非同期テスト（M1 + M2）。CI [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) で Postgres サービス + `--include-ignored` を実行 |
+| **`tests/` ディレクトリ**（core） | **未定義** — M2 CLI 契約は **`kotonoha-cli/tests/m2_integration.rs`** |
 
 ---
 

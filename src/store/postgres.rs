@@ -496,7 +496,7 @@ impl PgStore {
     }
 }
 
-fn meaning_delta_row_from_pg(row: sqlx::postgres::PgRow) -> MeaningDeltaRow {
+pub(crate) fn meaning_delta_row_from_pg(row: sqlx::postgres::PgRow) -> MeaningDeltaRow {
     use sqlx::Row;
     MeaningDeltaRow {
         id: row.get("id"),

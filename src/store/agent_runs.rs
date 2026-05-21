@@ -7,6 +7,7 @@ use sqlx::Row;
 use uuid::Uuid;
 
 use super::postgres::{PgStore, StoreError};
+use super::principals::{OperationContext, ProjectMemberRole};
 
 /// Allowed `agent_runs.status` values (matches migration check constraint).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -50,6 +51,7 @@ pub struct AgentRunRow {
     pub status: String,
     pub output_artifact_refs: Value,
     pub denied_actions: Value,
+    pub principal_id: Option<uuid::Uuid>,
 }
 
 /// Input to start an AgentRun.
@@ -60,6 +62,8 @@ pub struct StartAgentRunInput {
     pub capability_profile: Option<String>,
     pub parent_run_id: Option<Uuid>,
     pub payload: Value,
+    /// M6: executing principal (defaults to legacy default when unset).
+    pub principal_id: Option<uuid::Uuid>,
 }
 
 /// One denied-operation audit entry stored in `denied_actions` JSONB array.
@@ -97,6 +101,33 @@ impl PgStore {
         } else {
             input.payload.clone()
         };
+        let m6 = self.m6_schema_present().await?;
+        if m6 {
+            let ctx = OperationContext::resolve(input.principal_id, None);
+            self.require_project_role(&ctx, ProjectMemberRole::AgentRunner)
+                .await?;
+            let id = sqlx::query_scalar::<_, Uuid>(
+                r#"INSERT INTO agent_runs (
+                       agent_kind, external_ref, payload,
+                       capability_profile, parent_run_id, status,
+                       output_artifact_refs, denied_actions, principal_id
+                   )
+                   VALUES ($1, $2, $3, $4, $5, 'started', '[]'::jsonb, '[]'::jsonb, $6)
+                   RETURNING id"#,
+            )
+            .bind(&input.agent_kind)
+            .bind(&input.external_ref)
+            .bind(&payload)
+            .bind(&input.capability_profile)
+            .bind(input.parent_run_id)
+            .bind(ctx.principal_id)
+            .fetch_one(self.pool())
+            .await?;
+            return self
+                .get_agent_run(id)
+                .await?
+                .ok_or(StoreError::Sql(sqlx::Error::RowNotFound));
+        }
         let id = sqlx::query_scalar::<_, Uuid>(
             r#"INSERT INTO agent_runs (
                    agent_kind, external_ref, payload,
@@ -120,15 +151,29 @@ impl PgStore {
 
     /// Fetches an AgentRun by id.
     pub async fn get_agent_run(&self, id: Uuid) -> Result<Option<AgentRunRow>, StoreError> {
-        let row = sqlx::query(
-            r#"SELECT id, agent_kind, external_ref, payload,
-                      capability_profile, parent_run_id, status,
-                      output_artifact_refs, denied_actions
-               FROM agent_runs WHERE id = $1"#,
-        )
-        .bind(id)
-        .fetch_optional(self.pool())
-        .await?;
+        let m6 = self.m6_schema_present().await?;
+        let row = if m6 {
+            sqlx::query(
+                r#"SELECT id, agent_kind, external_ref, payload,
+                          capability_profile, parent_run_id, status,
+                          output_artifact_refs, denied_actions, principal_id
+                   FROM agent_runs WHERE id = $1"#,
+            )
+            .bind(id)
+            .fetch_optional(self.pool())
+            .await?
+        } else {
+            sqlx::query(
+                r#"SELECT id, agent_kind, external_ref, payload,
+                          capability_profile, parent_run_id, status,
+                          output_artifact_refs, denied_actions,
+                          NULL::uuid AS principal_id
+                   FROM agent_runs WHERE id = $1"#,
+            )
+            .bind(id)
+            .fetch_optional(self.pool())
+            .await?
+        };
         Ok(row.map(agent_run_row_from_pg))
     }
 
@@ -198,6 +243,7 @@ fn agent_run_row_from_pg(row: sqlx::postgres::PgRow) -> AgentRunRow {
         status: row.get("status"),
         output_artifact_refs: row.get("output_artifact_refs"),
         denied_actions: row.get("denied_actions"),
+        principal_id: row.get("principal_id"),
     }
 }
 
@@ -244,6 +290,7 @@ mod agent_runs_integration_tests {
                 capability_profile: Some("kotonoha-agent".into()),
                 parent_run_id: None,
                 payload: json!({"channel": "m5-itest"}),
+                principal_id: None,
             })
             .await
             .expect("start");

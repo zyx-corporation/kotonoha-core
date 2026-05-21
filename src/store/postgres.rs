@@ -16,6 +16,8 @@ use crate::rde_attach::{
 };
 use crate::semantic_lineage::{MeaningDeltaInput, RecordReviewDecisionInput, SemanticLineageError};
 
+use super::principals::{OperationContext, ProjectMemberRole};
+
 /// Pool wrapper around the v0 schema (`migrations/`).
 #[derive(Debug, Clone)]
 pub struct PgStore {
@@ -245,6 +247,49 @@ impl PgStore {
     ) -> Result<Uuid, StoreError> {
         input.validate().map_err(StoreError::SemanticLineage)?;
         let a = &input.git_anchor;
+        let m6 = self.m6_schema_present().await?;
+        if m6 {
+            let ctx = OperationContext::resolve(input.acting_principal_id, input.project_id);
+            if let Some(run_id) = input.agent_run_id {
+                self.require_project_role(&ctx, ProjectMemberRole::AgentRunner)
+                    .await?;
+                self.require_agent_run_principal(run_id, ctx.principal_id)
+                    .await?;
+            } else {
+                self.require_project_role_any(
+                    &ctx,
+                    &[
+                        ProjectMemberRole::Owner,
+                        ProjectMemberRole::Reviewer,
+                        ProjectMemberRole::AgentRunner,
+                    ],
+                )
+                .await?;
+            }
+            let id = sqlx::query_scalar::<_, Uuid>(
+                r#"INSERT INTO meaning_deltas (
+                    document_object_id, prior_meaning_state_id, new_meaning_state_id,
+                    agent_run_id, git_commit, file_path, line_range_start, line_range_end,
+                    diff_ref, observation, source_context, project_id
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, $11::jsonb, $12)
+                RETURNING id"#,
+            )
+            .bind(input.document_object_id)
+            .bind(input.prior_meaning_state_id)
+            .bind(input.new_meaning_state_id)
+            .bind(input.agent_run_id)
+            .bind(&a.git_commit)
+            .bind(&a.file_path)
+            .bind(a.line_range_start)
+            .bind(a.line_range_end)
+            .bind(&a.diff_ref)
+            .bind(Json(input.observation.clone()))
+            .bind(Json(input.source_context.clone()))
+            .bind(ctx.project_id)
+            .fetch_one(&self.pool)
+            .await?;
+            return Ok(id);
+        }
         let id = sqlx::query_scalar::<_, Uuid>(
             r#"INSERT INTO meaning_deltas (
                 document_object_id, prior_meaning_state_id, new_meaning_state_id,
@@ -297,6 +342,7 @@ impl PgStore {
                 audit_correlation_id,
                 materialize_rde_document,
                 Some(meta),
+                None,
             )
             .await?;
         Ok(ValidateAndAttachRdeResult {
@@ -322,7 +368,14 @@ impl PgStore {
         audit_correlation_id: Option<&str>,
         materialize_rde_document: bool,
         meta: Option<AttachRdeAssessmentMeta>,
+        acting_principal_id: Option<Uuid>,
     ) -> Result<Uuid, StoreError> {
+        if self.m6_schema_present().await? {
+            let project_id = self.meaning_delta_project_id(meaning_delta_id).await?;
+            let ctx = OperationContext::resolve(acting_principal_id, Some(project_id));
+            self.require_project_role(&ctx, ProjectMemberRole::AgentRunner)
+                .await?;
+        }
         if payload.get("rde_review_output").is_some() {
             validate_rde_payload(&payload, strict_rde)?;
         } else if !payload.is_object() {
@@ -377,6 +430,31 @@ impl PgStore {
         input: &RecordReviewDecisionInput,
     ) -> Result<Uuid, StoreError> {
         input.validate().map_err(StoreError::SemanticLineage)?;
+        let m6 = self.m6_schema_present().await?;
+        if m6 {
+            let project_id = self
+                .meaning_delta_project_id(input.meaning_delta_id)
+                .await?;
+            let ctx = OperationContext::resolve(input.principal_id, Some(project_id));
+            self.require_project_role(&ctx, ProjectMemberRole::Reviewer)
+                .await?;
+            let id = sqlx::query_scalar::<_, Uuid>(
+                r#"INSERT INTO review_decisions (
+                    meaning_delta_id, rde_assessment_id, decision, decided_by, rationale,
+                    principal_id
+                ) VALUES ($1, $2, $3, $4, $5::jsonb, $6)
+                RETURNING id"#,
+            )
+            .bind(input.meaning_delta_id)
+            .bind(input.rde_assessment_id)
+            .bind(input.decision.as_db_str())
+            .bind(&input.decided_by)
+            .bind(Json(input.rationale.clone()))
+            .bind(ctx.principal_id)
+            .fetch_one(&self.pool)
+            .await?;
+            return Ok(id);
+        }
         let id = sqlx::query_scalar::<_, Uuid>(
             r#"INSERT INTO review_decisions (
                 meaning_delta_id, rde_assessment_id, decision, decided_by, rationale
@@ -772,6 +850,8 @@ mod postgres_integration_tests {
                     "lost": []
                 }),
                 source_context: serde_json::json!({}),
+                project_id: None,
+                acting_principal_id: None,
             })
             .await
             .expect("create_meaning_delta");
@@ -793,7 +873,15 @@ mod postgres_integration_tests {
             }
         });
         let assessment_id = store
-            .attach_rde_assessment(delta_id, rde_payload, false, Some(&subject), true, None)
+            .attach_rde_assessment(
+                delta_id,
+                rde_payload,
+                false,
+                Some(&subject),
+                true,
+                None,
+                None,
+            )
             .await
             .expect("attach_rde_assessment");
 
@@ -804,6 +892,7 @@ mod postgres_integration_tests {
                 decision: ReviewDecisionKind::Approve,
                 decided_by: "integration-test".into(),
                 rationale: serde_json::json!({ "note": "ok" }),
+                principal_id: None,
             })
             .await
             .expect("record_review_decision");
@@ -887,6 +976,8 @@ mod postgres_integration_tests {
                 },
                 observation: serde_json::json!({ "preserved": ["intent"] }),
                 source_context: serde_json::json!({}),
+                project_id: None,
+                acting_principal_id: None,
             })
             .await
             .expect("delta");
@@ -960,6 +1051,8 @@ mod postgres_integration_tests {
                 },
                 observation: serde_json::json!({}),
                 source_context: serde_json::json!({}),
+                project_id: None,
+                acting_principal_id: None,
             })
             .await
             .expect("delta");

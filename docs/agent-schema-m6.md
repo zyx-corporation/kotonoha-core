@@ -48,4 +48,16 @@ Existing rows are assigned these IDs on migration. New deployments should create
 | `viewer` | Read / export |
 | `agent_runner` | AgentRun + delta + RDE attach |
 
-RBAC enforcement in application code is **M6-b** (not in this migration-only PR).
+## RBAC (M6-b · `store::principals`)
+
+When M6 schema is present, [`PgStore`](https://github.com/zyx-corporation/kotonoha-core/blob/main/src/store/postgres.rs) enforces:
+
+| Operation | Required role |
+| --- | --- |
+| `start_agent_run` | `agent_runner` |
+| `create_meaning_delta` (with `agent_run_id`) | `agent_runner` + run principal match |
+| `create_meaning_delta` (no agent run) | `owner` \| `reviewer` \| `agent_runner` |
+| `attach_rde_assessment` | `agent_runner` on delta's project |
+| `record_review_decision` | `reviewer` |
+
+Unset `acting_principal_id` / `project_id` / `principal_id` on inputs default to **legacy** UUIDs. Deny → [`SemanticLineageError::AccessDenied`](../src/semantic_lineage.rs).

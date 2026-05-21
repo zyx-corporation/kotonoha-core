@@ -476,7 +476,7 @@ impl PgStore {
     pub async fn get_meaning_delta(&self, id: Uuid) -> Result<Option<MeaningDeltaRow>, StoreError> {
         let row = sqlx::query(
             r#"SELECT id, git_commit, file_path, line_range_start, line_range_end, diff_ref,
-                      observation, source_context
+                      observation, source_context, project_id
                FROM meaning_deltas WHERE id = $1"#,
         )
         .bind(id)
@@ -522,20 +522,70 @@ impl PgStore {
     }
 
     /// Lists meaning deltas anchored to a Git commit (newest first).
+    ///
+    /// When `project_id` is set (M6), only deltas in that project are returned.
     pub async fn list_meaning_deltas_by_git_commit(
         &self,
         git_commit: &str,
+        project_id: Option<Uuid>,
     ) -> Result<Vec<MeaningDeltaRow>, StoreError> {
-        let rows = sqlx::query(
-            r#"SELECT id, git_commit, file_path, line_range_start, line_range_end, diff_ref,
-                      observation, source_context
-               FROM meaning_deltas
-               WHERE git_commit = $1
-               ORDER BY created_at DESC"#,
-        )
-        .bind(git_commit)
-        .fetch_all(&self.pool)
-        .await?;
+        let rows = if let Some(pid) = project_id {
+            sqlx::query(
+                r#"SELECT id, git_commit, file_path, line_range_start, line_range_end, diff_ref,
+                          observation, source_context, project_id
+                   FROM meaning_deltas
+                   WHERE git_commit = $1 AND project_id = $2
+                   ORDER BY created_at DESC"#,
+            )
+            .bind(git_commit)
+            .bind(pid)
+            .fetch_all(&self.pool)
+            .await?
+        } else {
+            sqlx::query(
+                r#"SELECT id, git_commit, file_path, line_range_start, line_range_end, diff_ref,
+                          observation, source_context, project_id
+                   FROM meaning_deltas
+                   WHERE git_commit = $1
+                   ORDER BY created_at DESC"#,
+            )
+            .bind(git_commit)
+            .fetch_all(&self.pool)
+            .await?
+        };
+        Ok(rows.into_iter().map(meaning_delta_row_from_pg).collect())
+    }
+
+    /// Lists meaning deltas in a project (newest first). Optional `git_commit` filter.
+    pub async fn list_meaning_deltas_by_project(
+        &self,
+        project_id: Uuid,
+        git_commit: Option<&str>,
+    ) -> Result<Vec<MeaningDeltaRow>, StoreError> {
+        let rows = if let Some(commit) = git_commit {
+            sqlx::query(
+                r#"SELECT id, git_commit, file_path, line_range_start, line_range_end, diff_ref,
+                          observation, source_context, project_id
+                   FROM meaning_deltas
+                   WHERE project_id = $1 AND git_commit = $2
+                   ORDER BY created_at DESC"#,
+            )
+            .bind(project_id)
+            .bind(commit)
+            .fetch_all(&self.pool)
+            .await?
+        } else {
+            sqlx::query(
+                r#"SELECT id, git_commit, file_path, line_range_start, line_range_end, diff_ref,
+                          observation, source_context, project_id
+                   FROM meaning_deltas
+                   WHERE project_id = $1
+                   ORDER BY created_at DESC"#,
+            )
+            .bind(project_id)
+            .fetch_all(&self.pool)
+            .await?
+        };
         Ok(rows.into_iter().map(meaning_delta_row_from_pg).collect())
     }
 
@@ -577,6 +627,7 @@ impl PgStore {
 
 pub(crate) fn meaning_delta_row_from_pg(row: sqlx::postgres::PgRow) -> MeaningDeltaRow {
     use sqlx::Row;
+    let project_id = row.try_get::<Option<Uuid>, _>("project_id").ok().flatten();
     MeaningDeltaRow {
         id: row.get("id"),
         git_commit: row.get("git_commit"),
@@ -586,6 +637,7 @@ pub(crate) fn meaning_delta_row_from_pg(row: sqlx::postgres::PgRow) -> MeaningDe
         diff_ref: row.get("diff_ref"),
         observation: row.get::<Json<serde_json::Value>, _>("observation").0,
         source_context: row.get::<Json<serde_json::Value>, _>("source_context").0,
+        project_id,
     }
 }
 
@@ -600,6 +652,8 @@ pub struct MeaningDeltaRow {
     pub diff_ref: Option<String>,
     pub observation: serde_json::Value,
     pub source_context: serde_json::Value,
+    /// M6 project scope (`meaning_deltas.project_id`).
+    pub project_id: Option<Uuid>,
 }
 
 /// Row returned by [`PgStore::list_rde_assessments_for_meaning_delta`].
@@ -907,7 +961,7 @@ mod postgres_integration_tests {
         assert_eq!(row.file_path, "docs/example.md");
 
         let listed = store
-            .list_meaning_deltas_by_git_commit(&commit)
+            .list_meaning_deltas_by_git_commit(&commit, None)
             .await
             .expect("list");
         assert_eq!(listed.len(), 1);

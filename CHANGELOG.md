@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.15] — 2026-05-21
+
+### Changed
+
+- **`validate_and_attach_rde`:** optional `acting_principal_id` for M6 RBAC on attach ([#138](https://github.com/zyx-corporation/kotonoha-management/issues/138) M6-c).
+
 ## [0.1.14] — 2026-05-21
 
 ### Added

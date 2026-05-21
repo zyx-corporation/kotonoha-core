@@ -88,7 +88,10 @@ impl PgStore {
     }
 
     /// Inserts a new AgentRun with `status = started`.
-    pub async fn start_agent_run(&self, input: &StartAgentRunInput) -> Result<AgentRunRow, StoreError> {
+    pub async fn start_agent_run(
+        &self,
+        input: &StartAgentRunInput,
+    ) -> Result<AgentRunRow, StoreError> {
         let payload = if input.payload.is_null() {
             Value::Object(serde_json::Map::new())
         } else {

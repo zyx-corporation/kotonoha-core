@@ -10,9 +10,7 @@ pub mod github_links;
 pub mod postgres;
 
 #[cfg(feature = "postgres")]
-pub use agent_runs::{
-    AgentRunRow, AgentRunStatus, DeniedActionRecord, StartAgentRunInput,
-};
+pub use agent_runs::{AgentRunRow, AgentRunStatus, DeniedActionRecord, StartAgentRunInput};
 #[cfg(feature = "postgres")]
 pub use github_links::{
     GithubIssueLinkRow, GithubPullRequestLinkRow, GithubRepoRef, GithubRepositoryLinkRow,

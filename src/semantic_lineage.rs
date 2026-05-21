@@ -25,6 +25,8 @@ pub enum SemanticLineageError {
     MissingGitAnchorDetail,
     InvalidLineRange,
     EmptyDecidedBy,
+    /// M6: principal lacks required `project_members.role`.
+    AccessDenied(String),
 }
 
 impl std::fmt::Display for SemanticLineageError {
@@ -39,6 +41,7 @@ impl std::fmt::Display for SemanticLineageError {
                 f.write_str("line_range_end must be >= line_range_start")
             }
             SemanticLineageError::EmptyDecidedBy => f.write_str("decided_by must not be empty"),
+            SemanticLineageError::AccessDenied(msg) => f.write_str(msg),
         }
     }
 }
@@ -83,6 +86,12 @@ pub struct MeaningDeltaInput {
     pub observation: Value,
     #[serde(default)]
     pub source_context: Value,
+    /// M6: project scope (defaults to legacy `default` project when unset).
+    #[serde(default)]
+    pub project_id: Option<Uuid>,
+    /// M6: acting principal (defaults to legacy default principal when unset).
+    #[serde(default)]
+    pub acting_principal_id: Option<Uuid>,
 }
 
 impl MeaningDeltaInput {
@@ -121,6 +130,9 @@ pub struct RecordReviewDecisionInput {
     pub decided_by: String,
     #[serde(default)]
     pub rationale: Value,
+    /// M6: reviewer principal (defaults to legacy default when unset).
+    #[serde(default)]
+    pub principal_id: Option<Uuid>,
 }
 
 impl RecordReviewDecisionInput {

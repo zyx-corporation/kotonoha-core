@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.14] — 2026-05-21
+
+### Added
+
+- **M6-b RBAC** ([#138](https://github.com/zyx-corporation/kotonoha-management/issues/138)): `OperationContext`, `require_project_role`, INSERT-time `principal_id` / `project_id`; review requires `reviewer` role.
+
 ## [0.1.13] — 2026-05-21
 
 ### Added

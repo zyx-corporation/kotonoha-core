@@ -445,6 +445,8 @@ mod github_links_integration_tests {
                 },
                 observation: json!({}),
                 source_context: json!({}),
+                project_id: None,
+                acting_principal_id: None,
             })
             .await
             .expect("create delta");
@@ -486,6 +488,7 @@ mod github_links_integration_tests {
                 decision: ReviewDecisionKind::Approve,
                 decided_by: "reviewer@m4-itest".into(),
                 rationale: json!({}),
+                principal_id: None,
             })
             .await
             .expect("review");

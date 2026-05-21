@@ -20,4 +20,6 @@ pub use github_links::{
     GithubReviewCommentRefRow,
 };
 #[cfg(feature = "postgres")]
-pub use principals::{LegacyDefaults, PrincipalKind, PrincipalRow, ProjectMemberRole, ProjectRow};
+pub use principals::{
+    LegacyDefaults, OperationContext, PrincipalKind, PrincipalRow, ProjectMemberRole, ProjectRow,
+};

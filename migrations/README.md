@@ -29,5 +29,6 @@ Use a dedicated database user with least privilege in real deployments.
 | `20260520000000_m1_semantic_lineage.sql` | **M1 draft:** `document_objects`, `meaning_states`, `meaning_deltas`, `rde_assessments`, `review_decisions`, `agent_runs` ([#21](https://github.com/zyx-corporation/kotonoha-core/issues/21)). |
 | `20260520100000_m4_github_links.sql` | **M4:** `github_*_links` tables ([#32](https://github.com/zyx-corporation/kotonoha-core/issues/32)). |
 | `20260521100000_m5_agent_runs_extend.sql` | **M5:** `agent_runs` extension ([#33](https://github.com/zyx-corporation/kotonoha-core/issues/33)). |
+| `20260522120000_m6_principals_projects.sql` | **M6:** `principals` / `projects` / `project_members` + FK columns ([#138](https://github.com/zyx-corporation/kotonoha-management/issues/138)). |
 
-See [`docs/postgresql-schema-v0.md`](../docs/postgresql-schema-v0.md), [`docs/postgresql-schema-m1.md`](../docs/postgresql-schema-m1.md), [`docs/github-schema-m4.md`](../docs/github-schema-m4.md), and [`docs/agent-schema-m5.md`](../docs/agent-schema-m5.md) for column semantics.
+See [`docs/postgresql-schema-v0.md`](../docs/postgresql-schema-v0.md), [`docs/postgresql-schema-m1.md`](../docs/postgresql-schema-m1.md), [`docs/github-schema-m4.md`](../docs/github-schema-m4.md), [`docs/agent-schema-m5.md`](../docs/agent-schema-m5.md), and [`docs/agent-schema-m6.md`](../docs/agent-schema-m6.md) for column semantics.

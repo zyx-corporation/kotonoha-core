@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.16] — 2026-05-21
+
+### Added
+
+- **M6-f** ([#138](https://github.com/zyx-corporation/kotonoha-management/issues/138)): `list_meaning_deltas_by_git_commit` optional `project_id` filter; `list_meaning_deltas_by_project`; `list_meaning_deltas_for_audit_export` (viewer+ RBAC); `MeaningDeltaRow.project_id`.
+
 ## [0.1.15] — 2026-05-21
 
 ### Changed

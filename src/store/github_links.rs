@@ -296,7 +296,8 @@ impl PgStore {
 
         let rows = sqlx::query(
             r#"SELECT DISTINCT md.id, md.git_commit, md.file_path, md.line_range_start,
-                      md.line_range_end, md.diff_ref, md.observation, md.source_context
+                      md.line_range_end, md.diff_ref, md.observation, md.source_context,
+                      md.project_id
                FROM meaning_deltas md
                LEFT JOIN github_pull_request_links prl
                  ON prl.meaning_delta_id = md.id

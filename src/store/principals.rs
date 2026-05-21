@@ -277,6 +277,26 @@ impl PgStore {
         )))
     }
 
+    /// Lists meaning deltas for M6 audit export (`viewer` or higher on `ctx.project_id`).
+    pub async fn list_meaning_deltas_for_audit_export(
+        &self,
+        ctx: &OperationContext,
+        git_commit: Option<&str>,
+    ) -> Result<Vec<super::postgres::MeaningDeltaRow>, StoreError> {
+        self.require_project_role_any(
+            ctx,
+            &[
+                ProjectMemberRole::Viewer,
+                ProjectMemberRole::Reviewer,
+                ProjectMemberRole::AgentRunner,
+                ProjectMemberRole::Owner,
+            ],
+        )
+        .await?;
+        self.list_meaning_deltas_by_project(ctx.project_id, git_commit)
+            .await
+    }
+
     /// Loads legacy default principal and project (post-migration).
     pub async fn get_legacy_defaults(&self) -> Result<(PrincipalRow, ProjectRow), StoreError> {
         let principal = self
@@ -446,5 +466,116 @@ mod principals_integration_tests {
             })
             .await
             .expect("review after role grant");
+    }
+
+    #[tokio::test]
+    #[ignore = "requires DATABASE_URL"]
+    async fn m6_two_projects_list_export_isolation() {
+        use crate::semantic_lineage::{GitAnchor, MeaningDeltaInput};
+
+        let store = PgStore::connect(&database_url_for_integration_test())
+            .await
+            .expect("connect");
+        store.migrate().await.expect("migrate");
+
+        let project_b_id: Uuid = sqlx::query_scalar(
+            r#"INSERT INTO projects (slug, name) VALUES ('m6-team-b', 'Team B') RETURNING id"#,
+        )
+        .fetch_one(store.pool())
+        .await
+        .expect("project b");
+
+        let runner_b: Uuid = sqlx::query_scalar(
+            r#"INSERT INTO principals (kind, display_name, external_ref)
+               VALUES ('human', 'Runner B', 'test.m6.runner-b') RETURNING id"#,
+        )
+        .fetch_one(store.pool())
+        .await
+        .expect("principal b");
+
+        sqlx::query(
+            r#"INSERT INTO project_members (project_id, principal_id, role)
+               VALUES ($1, $2, 'agent_runner')"#,
+        )
+        .bind(project_b_id)
+        .bind(runner_b)
+        .execute(store.pool())
+        .await
+        .expect("membership b");
+
+        let shared_commit = uuid::Uuid::new_v4().to_string().replace('-', "");
+
+        let delta_default = store
+            .create_meaning_delta(&MeaningDeltaInput {
+                document_object_id: None,
+                prior_meaning_state_id: None,
+                new_meaning_state_id: None,
+                agent_run_id: None,
+                git_anchor: GitAnchor {
+                    git_commit: shared_commit.clone(),
+                    file_path: "docs/default.md".into(),
+                    line_range_start: Some(1),
+                    line_range_end: Some(1),
+                    diff_ref: None,
+                },
+                observation: serde_json::json!({"note": "default project"}),
+                source_context: serde_json::json!({}),
+                project_id: Some(LegacyDefaults::PROJECT_ID),
+                acting_principal_id: Some(LegacyDefaults::PRINCIPAL_ID),
+            })
+            .await
+            .expect("delta default");
+
+        let delta_b = store
+            .create_meaning_delta(&MeaningDeltaInput {
+                document_object_id: None,
+                prior_meaning_state_id: None,
+                new_meaning_state_id: None,
+                agent_run_id: None,
+                git_anchor: GitAnchor {
+                    git_commit: shared_commit.clone(),
+                    file_path: "docs/team-b.md".into(),
+                    line_range_start: Some(1),
+                    line_range_end: Some(1),
+                    diff_ref: None,
+                },
+                observation: serde_json::json!({"note": "team b"}),
+                source_context: serde_json::json!({}),
+                project_id: Some(project_b_id),
+                acting_principal_id: Some(runner_b),
+            })
+            .await
+            .expect("delta b");
+
+        let unscoped = store
+            .list_meaning_deltas_by_git_commit(&shared_commit, None)
+            .await
+            .expect("list unscoped");
+        assert!(unscoped.len() >= 2);
+
+        let scoped_default = store
+            .list_meaning_deltas_by_git_commit(&shared_commit, Some(LegacyDefaults::PROJECT_ID))
+            .await
+            .expect("list default");
+        assert_eq!(scoped_default.len(), 1);
+        assert_eq!(scoped_default[0].id, delta_default);
+
+        let scoped_b = store
+            .list_meaning_deltas_by_git_commit(&shared_commit, Some(project_b_id))
+            .await
+            .expect("list b");
+        assert_eq!(scoped_b.len(), 1);
+        assert_eq!(scoped_b[0].id, delta_b);
+
+        let ctx_b = OperationContext {
+            principal_id: runner_b,
+            project_id: project_b_id,
+        };
+        let audit_b = store
+            .list_meaning_deltas_for_audit_export(&ctx_b, Some(&shared_commit))
+            .await
+            .expect("audit export list b");
+        assert_eq!(audit_b.len(), 1);
+        assert_eq!(audit_b[0].id, delta_b);
     }
 }

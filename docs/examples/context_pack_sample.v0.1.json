@@ -1,0 +1,29 @@
+{
+  "format": "kotonoha.context_pack.v0.1",
+  "generated_at_unix": 1779333600,
+  "git_anchor": {
+    "git_commit": "07caa1e47d204e15547e70187e6e5a8feb4b5011",
+    "file_path": "note.md",
+    "line_range_start": 2,
+    "line_range_end": 2,
+    "diff_ref": null
+  },
+  "meaning_delta_draft": {
+    "observation": {
+      "intended_change": "M5 agent channel: draft meaning change before human confirm",
+      "preserved": ["intent", "scope"]
+    },
+    "source_context": {}
+  },
+  "rde_hints": {
+    "hints": [
+      {
+        "observation_key": "preserved",
+        "category": "preserved",
+        "hints": ["intent", "scope"]
+      }
+    ],
+    "unknown_keys": ["intended_change"]
+  },
+  "policy_ref": "https://github.com/zyx-corporation/kotonoha-management/blob/main/docs/31_m5_agent_run_integration_spec_draft.md"
+}

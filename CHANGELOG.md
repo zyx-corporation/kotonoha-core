@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.12] — 2026-05-21
+
+### Added
+
+- **M5 context pack** ([#34](https://github.com/zyx-corporation/kotonoha-core/issues/34)): `context_pack` module — `kotonoha.context_pack.v0.1`, `build_context_pack`, sample [`docs/examples/context_pack_sample.v0.1.json`](docs/examples/context_pack_sample.v0.1.json).
+
+## [0.1.11] — 2026-05-21
+
+### Added
+
+- **M5 AgentRun** ([#33](https://github.com/zyx-corporation/kotonoha-core/issues/33)): `agent_runs` extension migration + `store::agent_runs` PgStore APIs; [`docs/agent-schema-m5.md`](docs/agent-schema-m5.md).
+
+## [0.1.10] — 2026-05-20
+
+### Added
+
+- **M4 GitHub links** ([#32](https://github.com/zyx-corporation/kotonoha-core/issues/32)): `github_*_links` tables + `store::github_links`.
+
 ## [0.1.9] — 2026-05-22
 
 ### Added (tests)

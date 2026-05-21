@@ -33,6 +33,10 @@ See `src/store/agent_runs.rs`:
 - `append_agent_run_denied_action`
 - `set_agent_run_output_artifacts`
 
+## Related
+
+- Context pack: [`context-pack-schema-m5.md`](context-pack-schema-m5.md) ([#34](https://github.com/zyx-corporation/kotonoha-core/issues/34))
+
 ## Issue
 
 [kotonoha-core#33](https://github.com/zyx-corporation/kotonoha-core/issues/33) · parent [management#106](https://github.com/zyx-corporation/kotonoha-management/issues/106)

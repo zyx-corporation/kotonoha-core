@@ -687,6 +687,35 @@ mod postgres_integration_tests {
 
     #[tokio::test]
     #[ignore = "requires DATABASE_URL and PostgreSQL (run with: cargo test --features postgres -- --include-ignored)"]
+    async fn migrate_applies_m6_principals_tables() {
+        use crate::store::LegacyDefaults;
+
+        let url = database_url_for_integration_test();
+        let store = PgStore::connect(&url).await.expect("connect");
+        store.migrate().await.expect("migrate");
+        assert!(store.m6_schema_present().await.expect("m6 check"));
+
+        for table in ["principals", "projects", "project_members"] {
+            let exists: bool = sqlx::query_scalar(
+                "SELECT EXISTS (
+                    SELECT 1 FROM information_schema.tables
+                    WHERE table_schema = 'public' AND table_name = $1
+                )",
+            )
+            .bind(table)
+            .fetch_one(store.pool())
+            .await
+            .unwrap_or_else(|e| panic!("check table {table}: {e}"));
+            assert!(exists, "expected public.{table} after M6 migration");
+        }
+
+        let (principal, project) = store.get_legacy_defaults().await.expect("defaults");
+        assert_eq!(principal.id, LegacyDefaults::PRINCIPAL_ID);
+        assert_eq!(project.slug, LegacyDefaults::PROJECT_SLUG);
+    }
+
+    #[tokio::test]
+    #[ignore = "requires DATABASE_URL and PostgreSQL (run with: cargo test --features postgres -- --include-ignored)"]
     async fn migrate_applies_m1_semantic_lineage_tables() {
         let url = database_url_for_integration_test();
         let store = PgStore::connect(&url).await.expect("connect");

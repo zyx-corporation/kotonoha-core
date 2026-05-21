@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.13] — 2026-05-21
+
+### Added
+
+- **M6 Team Mode (schema)** ([#138](https://github.com/zyx-corporation/kotonoha-management/issues/138)): migration [`20260522120000_m6_principals_projects.sql`](migrations/20260522120000_m6_principals_projects.sql) — `principals`, `projects`, `project_members`; `principal_id` / `project_id` columns with legacy backfill; [`docs/agent-schema-m6.md`](docs/agent-schema-m6.md); `store::principals` (`LegacyDefaults`, `m6_schema_present`, `principal_has_role`).
+
 ## [0.1.12] — 2026-05-21
 
 ### Added

@@ -325,6 +325,7 @@ impl PgStore {
         source_kind: RdeSourceKind,
         audit_correlation_id: Option<&str>,
         materialize_rde_document: bool,
+        acting_principal_id: Option<Uuid>,
     ) -> Result<ValidateAndAttachRdeResult, StoreError> {
         let warnings = validate_rde_payload(&payload, strict_rde)?;
         let validation_report = build_validation_report(strict_rde, &warnings);
@@ -342,7 +343,7 @@ impl PgStore {
                 audit_correlation_id,
                 materialize_rde_document,
                 Some(meta),
-                None,
+                acting_principal_id,
             )
             .await?;
         Ok(ValidateAndAttachRdeResult {
@@ -1007,6 +1008,7 @@ mod postgres_integration_tests {
                 RdeSourceKind::Cli,
                 Some("m2-itest"),
                 false,
+                None,
             )
             .await
             .expect("validate_and_attach");
@@ -1074,7 +1076,15 @@ mod postgres_integration_tests {
         });
 
         let err = store
-            .validate_and_attach_rde(delta_id, rde_payload, true, RdeSourceKind::Cli, None, false)
+            .validate_and_attach_rde(
+                delta_id,
+                rde_payload,
+                true,
+                RdeSourceKind::Cli,
+                None,
+                false,
+                None,
+            )
             .await
             .expect_err("strict should fail");
         assert!(matches!(err, StoreError::RdeValidation(_)));

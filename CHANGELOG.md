@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **SLS-9 / Phase 2:** `source_context_status` closed-vocabulary validation in [`src/rde.rs`](src/rde.rs) ([#44](https://github.com/zyx-corporation/kotonoha-core/issues/44)); unit tests for accepted, unknown, and non-string values.
+
+### Documentation
+
+- [`docs/spec-traceability.md`](docs/spec-traceability.md): SLS-9 row and M4 GitHub correlation (non-normative) mapping ([#45](https://github.com/zyx-corporation/kotonoha-core/issues/45)).
+
 ## [0.1.16] — 2026-05-21
 
 ### Added

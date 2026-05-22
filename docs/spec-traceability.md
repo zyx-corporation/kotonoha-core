@@ -7,6 +7,7 @@ This document maps **`kotonoha-core`** Rust modules to [`kotonoha-spec`](https:/
 | [`SLS-1 Introduction`](https://github.com/zyx-corporation/kotonoha-spec/blob/main/docs/introduction.md) | [`TARGET_SPEC_BUNDLE`](../src/lib.rs) — must align with interchange `spec_version` / `spec_bundle`. |
 | [`SLS-3 Semantic lineage model`](https://github.com/zyx-corporation/kotonoha-spec/blob/main/docs/semantic-lineage-model.md) | [`src/lineage.rs`](../src/lineage.rs) — `LineageUnit` (serde **`deny_unknown_fields`**: only `id`, `prior_unit_id` in interchange JSON). |
 | [`SLS-4 RDE review output`](https://github.com/zyx-corporation/kotonoha-spec/blob/main/docs/rde-review-output.md) | [`src/rde.rs`](../src/rde.rs) — `validate_json`. |
+| [`SLS-9 Phase 2 validation profile`](https://github.com/zyx-corporation/kotonoha-spec/blob/main/docs/phase2-interchange-hardening.md) | [`src/rde.rs`](../src/rde.rs) — closed `source_context_status` vocabulary when present; schema: [`rde-review-output.phase2.schema.json`](https://github.com/zyx-corporation/kotonoha-spec/blob/main/schemas/rde-review-output.phase2.schema.json). Nested `spec_version` remains `0.1`. |
 | [`SLS-5 RDE implementation specification`](https://github.com/zyx-corporation/kotonoha-spec/blob/main/docs/rde-implementation-specification.md) | [`src/rde_impl.rs`](../src/rde_impl.rs) — `RdeSubject`, `RdeContext`, `RdeEvaluator`, `ConservativeRdeEvaluator`, `RdeEvaluation`, `RdeTraceability`. |
 | [`SLS-6 Representation of loss`](https://github.com/zyx-corporation/kotonoha-spec/blob/main/docs/representation-of-loss.md) | Enforced indirectly via RDE `lost` category validation in `rde.rs`; conservative implementation scaffold can emit `RdeCategory::Lost` in `rde_impl.rs`. |
 | [`SLS-7 Relationship to audit trails`](https://github.com/zyx-corporation/kotonoha-spec/blob/main/docs/audit-trail-relationship.md) | [`src/rde_impl.rs`](../src/rde_impl.rs) — `RdeTraceability.audit_correlation_id`; [`src/store/postgres.rs`](../src/store/postgres.rs) under optional `postgres` feature. |
@@ -79,6 +80,15 @@ DDL sketches: [`migrations/`](../migrations/) — baseline [`20260510000000_v0_i
 ## Phase 3 bridge (CLI ingest — informative)
 
 The official **`kotonoha` CLI** (≥ **0.2.0**) exposes **`interchange ingest`** for a **`kotonoha.console_event.v0`** wrapper that dispatches to the same **`rde`** / **`interchange`** validation (and optional Postgres insert) as this crate’s public APIs. **Not normative in `kotonoha-spec`.** **W-2 outline** payload rules: [`20` §3](https://github.com/zyx-corporation/kotonoha-management/blob/main/docs/20_phase3_core_console_contract_outline_draft.md). **Parity / gap tables:** [`core-console-contract-gap-phase3-draft.md`](core-console-contract-gap-phase3-draft.md). Public CLI contract: [`kotonoha-cli` `cli-definition.md` §4.1](https://github.com/zyx-corporation/kotonoha-cli/blob/main/docs/cli-definition.md).
+
+## M4 GitHub correlation (implementation — informative)
+
+| Concern | Rust module | Notes |
+| --- | --- | --- |
+| Repository / Issue / PR links | [`src/store/github_links.rs`](../src/store/github_links.rs) | Tables `github_*_links`; **not** normative SLS storage ([`audit-trail-relationship.md`](https://github.com/zyx-corporation/kotonoha-spec/blob/main/docs/audit-trail-relationship.md) correlation only). |
+| CLI surface | [`kotonoha-cli` `github` subcommands](https://github.com/zyx-corporation/kotonoha-cli/blob/main/docs/github-integration.md) | Evidence/context for review; not approval by linkage alone. |
+
+Integration test: `github_links_integration_tests::m4_github_links_roundtrip` (`DATABASE_URL`, `#[ignore]`).
 
 ## Deferred (Phase 3 and later)
 

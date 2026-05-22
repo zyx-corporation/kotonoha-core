@@ -14,6 +14,15 @@ const CATEGORY_KEYS: [&str; 7] = [
     "next_update_policy",
 ];
 
+const SOURCE_CONTEXT_STATUS_VALUES: [&str; 6] = [
+    "supplied",
+    "resolved",
+    "inferred",
+    "missing",
+    "partial",
+    "contested",
+];
+
 /// Validates UTF-8 JSON text as Phase 1 RDE interchange (`spec_version` must match [`crate::TARGET_SPEC_BUNDLE`]).
 ///
 /// Returns **warnings** (non-fatal `SHOULD` gaps) when `strict` is `false`.
@@ -97,6 +106,21 @@ pub fn validate_json(text: &str, strict: bool) -> Result<Vec<String>, String> {
                     return Err(msg);
                 }
                 warnings.push(msg);
+            }
+
+            if let Some(status) = obj.get("source_context_status") {
+                let status_str = status.as_str().ok_or_else(|| {
+                    format!(
+                        "category {:?}[{}]: \"source_context_status\" must be a string from the Phase 1 closed vocabulary",
+                        key, i
+                    )
+                })?;
+                if !SOURCE_CONTEXT_STATUS_VALUES.contains(&status_str) {
+                    return Err(format!(
+                        "category {:?}[{}]: unknown source_context_status {:?} (allowed: {:?})",
+                        key, i, status_str, SOURCE_CONTEXT_STATUS_VALUES
+                    ));
+                }
             }
         }
     }
@@ -322,6 +346,89 @@ mod tests {
             }
         }"#;
         assert!(validate_json(j, false).unwrap().is_empty());
+    }
+
+    #[test]
+    fn accepts_source_context_status_closed_vocabulary() {
+        let j = r#"{
+            "rde_review_output": {
+                "spec_version": "0.1",
+                "subject_ref": "https://example.invalid/x",
+                "categories": {
+                    "preserved": [
+                        {
+                            "summary": "kept intact",
+                            "source_context_status": "supplied"
+                        }
+                    ],
+                    "transformed": [],
+                    "complemented": [],
+                    "intentionally_unresolved": [],
+                    "lost": [],
+                    "deviation_risk": [],
+                    "next_update_policy": []
+                }
+            }
+        }"#;
+        assert!(validate_json(j, false).unwrap().is_empty());
+    }
+
+    #[test]
+    fn rejects_unknown_source_context_status() {
+        let j = r#"{
+            "rde_review_output": {
+                "spec_version": "0.1",
+                "subject_ref": "https://example.invalid/x",
+                "categories": {
+                    "preserved": [
+                        {
+                            "summary": "kept intact",
+                            "source_context_status": "guessed"
+                        }
+                    ],
+                    "transformed": [],
+                    "complemented": [],
+                    "intentionally_unresolved": [],
+                    "lost": [],
+                    "deviation_risk": [],
+                    "next_update_policy": []
+                }
+            }
+        }"#;
+        let e = validate_json(j, false).unwrap_err();
+        assert!(
+            e.contains("source_context_status"),
+            "expected source_context_status error, got {e:?}"
+        );
+    }
+
+    #[test]
+    fn rejects_non_string_source_context_status() {
+        let j = r#"{
+            "rde_review_output": {
+                "spec_version": "0.1",
+                "subject_ref": "https://example.invalid/x",
+                "categories": {
+                    "preserved": [
+                        {
+                            "summary": "kept intact",
+                            "source_context_status": true
+                        }
+                    ],
+                    "transformed": [],
+                    "complemented": [],
+                    "intentionally_unresolved": [],
+                    "lost": [],
+                    "deviation_risk": [],
+                    "next_update_policy": []
+                }
+            }
+        }"#;
+        let e = validate_json(j, false).unwrap_err();
+        assert!(
+            e.contains("source_context_status"),
+            "expected source_context_status type error, got {e:?}"
+        );
     }
 
     #[test]

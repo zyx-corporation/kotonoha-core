@@ -15,6 +15,8 @@ This file summarizes **how `kotonoha-core` fits** in the public Kotonoha / SLS e
 | **`kotonoha-cli`** | Thin CLI wrapping core validation and storage; authoritative CLI contract in **[`cli-definition.md`](https://github.com/zyx-corporation/kotonoha-cli/blob/main/docs/cli-definition.md)**. |
 | **`kotonoha-docs`** | Non-normative manuals and tutorials — must cite `kotonoha-spec` for exact meanings. |
 
+**Core boundary (informative):** [`docs/responsibility-boundary.md`](responsibility-boundary.md) — canonical text in [`kotonoha-spec` `core-responsibility-boundary.md`](https://github.com/zyx-corporation/kotonoha-spec/blob/main/docs/core-responsibility-boundary.md).
+
 ---
 
 ## 2. Change flow (recommended)

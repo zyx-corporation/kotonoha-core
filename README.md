@@ -11,6 +11,8 @@
 
 Normative, review-facing specifications live in [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec). This repository implements those specifications; see **[spec traceability](docs/spec-traceability.md)** for section ↔ code mapping.
 
+**Responsibility boundary:** [`docs/responsibility-boundary.md`](docs/responsibility-boundary.md) (canonical text in [`kotonoha-spec` `core-responsibility-boundary.md`](https://github.com/zyx-corporation/kotonoha-spec/blob/main/docs/core-responsibility-boundary.md)).
+
 ### Repository governance (informative)
 
 [**`docs/repository-governance.md`**](docs/repository-governance.md) summarizes ecosystem roles (spec vs implementation), recommended change flow, and RDE scope — **not normative**. When in doubt, follow [`kotonoha-spec`](https://github.com/zyx-corporation/kotonoha-spec).

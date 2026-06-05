@@ -379,26 +379,30 @@ Phase D: DeltaMReport → RdeEvaluation / SLS-4 categories
 
 ### Phase D — RDE classifier pipeline
 
-**Status: design gate introduced (2026-06-05) — implementation not started.**
+**Status: classifier scaffold introduced (2026-06-05).**
 
-Phase D is the first layer that maps `DeltaMReport` into SLS-4 RDE categories. This is a higher-risk transition than Phase B or Phase C because it approaches normative RDE output.
+Delivered:
+
+- `RdeClassifier` trait — extensible boundary for mapping `DeltaMReport` into `RdeEvaluation`.
+- `ConservativeRdeClassifier` — deterministic, conservative mapping that follows the design gate constraints.
 
 Design gate: [`docs/rde-phase-d-classifier-design-gate.md`](rde-phase-d-classifier-design-gate.md).
 
-Prohibited shortcuts:
+Module: [`src/rde_classifier.rs`](../src/rde_classifier.rs).
 
-- Mechanical `Removed` → `lost` mapping.
-- Mechanical `Transformed` → `deviation_risk` mapping.
-- Treating `Complemented` as a good addition.
-- Classifier returning approval/rejection/safety verdicts.
-- Producing judgment without evidence or uncertainty notes.
+This is **not** full RDE semantic judgment. The classifier emits review-focused observations only. Final judgment belongs to the human review layer.
 
-Future implementation candidates:
+Mapping policy (conservative):
 
-- `RdeClassifier` trait
-- `ConservativeRdeClassifier`
-- classifier from `DeltaMReport` to `RdeEvaluation`
-- category-specific tests
+| ΔM relation | RDE category | Notes |
+|---|---|---|
+| `Preserved` | `preserved` | Direct. |
+| `Transformed` | `transformed` | With uncertainty note if evidence absent. |
+| `Complemented` | `complemented` | No value judgment. |
+| `Removed` | `next_update_policy` | **Not** `lost`. Human review required. |
+| `Contradicted` / `Weakened` | `next_update_policy` | **Not** `deviation_risk`. |
+| `Unresolved` | `next_update_policy` | **Not** automatically `intentionally_unresolved`. |
+| `Split` / `Merged` | `transformed` | With uncertainty note. |
 - evidence propagation
 
 ### Phase E — Evidence and traceability expansion

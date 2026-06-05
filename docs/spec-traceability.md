@@ -31,6 +31,7 @@ This document maps **`kotonoha-core`** Rust modules to [`kotonoha-spec`](https:/
 | `SLS-5.10` Policy/safety boundary | Module docs | RDE output is not enforcement/refusal/access control. |
 | `SLS-5.3.3` Context assembly (Phase B) | `RdeContextBundle` | Bundled human-supplied context (intent, non-goals, must-not-lose, spec refs, prior RDE, audit refs, review notes). |
 | `SLS-5.4.3` Semantic observation (Phase B) | `SemanticElementKind`, `SemanticElement`, `SemanticExtraction`, `SemanticExtractor` | Structural scaffolding for meaning-bearing element extraction; `ConservativeSemanticExtractor` as initial deterministic implementation. |
+| `SLS-5.4.3` ΔM analysis (Phase C) | `DeltaMRelationKind`, `DeltaMRelation`, `DeltaMReport`, `DeltaMAnalyzer`, `ConservativeDeltaMAnalyzer` | Structural ΔM relation layer that compares two `SemanticExtraction` objects. Not yet SLS-4 category classification (Phase D). [`src/rde_delta.rs`](../src/rde_delta.rs). |
 
 ## Phase 2 minimal scope (this repository)
 

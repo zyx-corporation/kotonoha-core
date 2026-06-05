@@ -337,21 +337,21 @@ Delivered:
 
 ### Phase B — Context bundle and semantic elements
 
-Next recommended work.
+**Status: scaffold introduced (2026-06-05).**
 
-Add:
+Delivered:
 
-- `RdeContextBundle`
-- `SemanticElementKind`
-- `SemanticElement`
-- `SemanticExtraction`
-- initial rule-based or manual extractor scaffold
+- `RdeError` — extraction/validation error enum (extensible for later phases).
+- `RdeContextBundle` — wraps `RdeSubject` with source intent, non-goals, must-not-lose, spec sections, prior RDE refs, audit refs, and human review notes.
+- `SemanticElementKind` — `Intent`, `Constraint`, `Assumption`, `Risk`, `Responsibility`, `UnresolvedQuestion`, `ValueClaim`, `FactualClaim`.
+- `SemanticElement` — typed container with `id`, `kind`, `text`, `source_ref`, `confidence_note`, `scope`.
+- `SemanticExtraction` — collection of `SemanticElement` per subject.
+- `SemanticExtractor` trait — extensible boundary for rule-based, model-assisted, and human-curated extractors.
+- `ConservativeSemanticExtractor` — deterministic, rule-based implementation that maps supplied context fields into typed elements without deep semantic analysis, LLM dependency, or approval/rejection verdicts.
 
-Candidate issue:
+Module: [`src/rde_semantic.rs`](../src/rde_semantic.rs).
 
-```text
-impl: add RdeContextBundle and SemanticElement extraction scaffold
-```
+This is not "semantic understanding complete." It is the structural scaffolding for meaning-bearing elements so that later ΔM analysis can compare how intent, constraints, risks, responsibilities, unresolved questions, and value/factual claims move across revisions.
 
 ### Phase C — ΔM report model
 

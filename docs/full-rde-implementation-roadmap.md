@@ -427,7 +427,30 @@ Future implementation candidates:
 - evidence binding from `RdeEvaluation` × source context
 - Markdown / JSON report connectivity
 
-### Phase F — Model-assisted evaluator adapters
+### Phase F — Meta-RDE
+
+**Status: design gate introduced (2026-06-05) — implementation not started.**
+
+Design gate: [`docs/meta-rde-design.md`](meta-rde-design.md).
+
+Phase F introduces `MetaRDE` as a recursive audit layer that inspects the full RDE pipeline output for drift from its design boundaries. It does **not** reclassify, approve, or reject.
+
+Pipeline position:
+
+```text
+Phase E: RdeEvaluation × Source Context → EvidenceBindingReport
+Phase F: Full Pipeline Output → MetaRdeReport
+Human Review: EvidenceBindingReport + MetaRdeReport → approval / rejection / revision
+```
+
+Future implementation candidates:
+
+- `MetaRdeReport`, `MetaRdeFinding`, `MetaRdeSeverity`
+- detection of classifier boundary drift
+- detection of evidence binder judgment drift
+- suspicious drift / critical distortion audit
+
+### Phase G — Model-assisted evaluator adapters
 
 Add optional adapters outside the core minimum.
 
@@ -443,16 +466,6 @@ Candidate issue:
 
 ```text
 impl: define optional model-assisted RDE adapter interface
-```
-
-### Phase G — Meta-RDE quality review
-
-Add checks for RDE output quality.
-
-Candidate issue:
-
-```text
-impl: add meta-RDE quality checks for evaluator output
 ```
 
 ## 8. Non-goals

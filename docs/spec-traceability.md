@@ -34,6 +34,7 @@ This document maps **`kotonoha-core`** Rust modules to [`kotonoha-spec`](https:/
 | `SLS-5.4.3` ΔM analysis (Phase C) | `DeltaMRelationKind`, `DeltaMRelation`, `DeltaMReport`, `DeltaMAnalyzer`, `ConservativeDeltaMAnalyzer` | Structural ΔM relation layer that compares two `SemanticExtraction` objects. Not yet SLS-4 category classification (Phase D). [`src/rde_delta.rs`](../src/rde_delta.rs). |
 | `SLS-5.4.4` RDE classification (Phase D) | `RdeClassifier`, `ConservativeRdeClassifier` | Conservative classifier scaffold that maps `DeltaMReport` into `RdeEvaluation` / SLS-4 categories. Review focus only; not final judgment. [`src/rde_classifier.rs`](../src/rde_classifier.rs). Design gate: [`docs/rde-phase-d-classifier-design-gate.md`](rde-phase-d-classifier-design-gate.md). |
 | `SLS-5.4.5` Evidence binding (Phase E) | `evidence-binder-design.md` | **Design gate only** — binds evidence references and uncertainty notes to RDE classification items. After classification, before human review. [`docs/evidence-binder-design.md`](evidence-binder-design.md). |
+| `SLS-5.7` Meta-RDE audit (Phase F) | `meta-rde-design.md` | **Design gate only** — recursive audit layer that inspects pipeline output for boundary drift. Review assistance, not judgment. [`docs/meta-rde-design.md`](meta-rde-design.md). |
 
 ## Phase 2 minimal scope (this repository)
 

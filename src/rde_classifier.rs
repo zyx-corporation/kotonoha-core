@@ -565,4 +565,308 @@ mod tests {
             .evidence_refs
             .contains(&"ref:commit-abc".to_string()));
     }
+
+    // ── End-to-end pipeline tests (Phase B → C → D) ────────────────────
+
+    use crate::rde_delta::{ConservativeDeltaMAnalyzer, DeltaMAnalyzer};
+    use crate::rde_impl::RdeSubject;
+    use crate::rde_semantic::{ConservativeSemanticExtractor, RdeContextBundle, SemanticExtractor};
+
+    /// Runs the full Phase B → C → D pipeline and returns the resulting `RdeEvaluation`.
+    fn run_pipeline(
+        source_context: &RdeContextBundle,
+        target_context: &RdeContextBundle,
+    ) -> RdeEvaluation {
+        let extractor = ConservativeSemanticExtractor;
+        let source_extraction = extractor
+            .extract(source_context)
+            .expect("Phase B: extract source");
+        let target_extraction = extractor
+            .extract(target_context)
+            .expect("Phase B: extract target");
+
+        let analyzer = ConservativeDeltaMAnalyzer;
+        let report = analyzer
+            .analyze(&source_extraction, &target_extraction)
+            .expect("Phase C: analyze delta");
+
+        let classifier = ConservativeRdeClassifier;
+        let eval = classifier
+            .classify(&report)
+            .expect("Phase D: classify to RDE");
+
+        // Validate SLS-4 output shape
+        let warnings = eval.validate(true).expect("validate_json should succeed");
+        assert!(
+            warnings.is_empty(),
+            "unexpected validation warnings: {warnings:?}"
+        );
+
+        eval
+    }
+
+    fn subject(ref_id: &str) -> RdeSubject {
+        RdeSubject::new(ref_id)
+    }
+
+    /// Helper: creates a context bundle with source_intent filled.
+    fn context_with_intent(subject_ref: &str, intent: &str) -> RdeContextBundle {
+        let mut ctx = RdeContextBundle::new(subject(subject_ref));
+        ctx.source_intent = Some(intent.to_string());
+        ctx
+    }
+
+    /// Helper: creates a context bundle with must_not_lose items.
+    fn context_with_must_not_lose(subject_ref: &str, items: &[&str]) -> RdeContextBundle {
+        let mut ctx = RdeContextBundle::new(subject(subject_ref));
+        ctx.must_not_lose = items.iter().map(|s| s.to_string()).collect();
+        ctx
+    }
+
+    /// Helper: collects all text (summary + confidence_note) from an evaluation.
+    fn all_text(eval: &RdeEvaluation) -> String {
+        eval.observations
+            .iter()
+            .flat_map(|o| {
+                [o.summary.as_str()]
+                    .into_iter()
+                    .chain(o.confidence_note.as_deref().into_iter())
+            })
+            .fold(String::new(), |mut acc, t| {
+                if !acc.is_empty() {
+                    acc.push(' ');
+                }
+                acc.push_str(t);
+                acc
+            })
+    }
+
+    // ── Pipeline: preserved / transformed / complemented basic case ─────
+
+    #[test]
+    fn pipeline_preserves_phase_boundaries() {
+        let source = context_with_intent("s/pipeline-1", "Keep public API stable");
+        let target = context_with_intent("s/pipeline-1", "Add caching layer");
+
+        let eval = run_pipeline(&source, &target);
+
+        // source_intent elements should appear as Preserved or Transformed
+        let has_category = |cat| eval.observations.iter().any(|o| o.category == cat);
+        // With the pipeline, the extractor generates Intent elements with auto-IDs.
+        // The analyzer compares by id. Since both contexts generate the same auto-id
+        // (subject_ref/element/1) but different text, they become Transformed.
+        assert!(has_category(RdeCategory::Transformed));
+
+        // No approval/rejection in the pipeline output
+        let text = all_text(&eval);
+        let forbidden = ["approved", "rejected", "safe", "unsafe"];
+        for word in forbidden {
+            assert!(
+                !text.to_lowercase().contains(word),
+                "pipeline must not contain verdict word {word:?}"
+            );
+        }
+
+        // Output must validate against SLS-4
+        assert!(eval.validate(true).unwrap().is_empty());
+    }
+
+    // ── Pipeline: no approval or safety verdicts in full pipeline ───────
+
+    #[test]
+    fn pipeline_does_not_generate_approval_or_safety_verdicts() {
+        let source = context_with_intent("s/pipeline-safe", "Original intent");
+        let target = context_with_intent("s/pipeline-safe", "Revised intent");
+
+        let eval = run_pipeline(&source, &target);
+        let text = all_text(&eval);
+
+        let forbidden = [
+            "approved",
+            "rejected",
+            "safe",
+            "unsafe",
+            "access granted",
+            "access denied",
+            "this removal is a loss",
+            "this transformation is dangerous",
+            "this addition is valuable",
+        ];
+        for word in forbidden {
+            assert!(
+                !text.to_lowercase().contains(word),
+                "pipeline must not contain verdict word {word:?}"
+            );
+        }
+    }
+
+    // ── Pipeline: uncertain changes routed to next_update_policy ────────
+
+    #[test]
+    fn pipeline_routes_uncertain_changes_to_next_update_policy() {
+        // source has must_not_lose items, target removes one
+        let source = context_with_must_not_lose(
+            "s/pipeline-uncertain",
+            &[
+                "backward compatibility with v1 clients",
+                "error message format",
+            ],
+        );
+        let target = context_with_must_not_lose(
+            "s/pipeline-uncertain",
+            &["backward compatibility with v1 clients"],
+        );
+        // "error message format" is removed in target
+
+        let eval = run_pipeline(&source, &target);
+
+        // The removed must_not_lose should appear in next_update_policy,
+        // NOT in lost
+        let lost_items: Vec<_> = eval
+            .observations
+            .iter()
+            .filter(|o| o.category == RdeCategory::Lost)
+            .collect();
+        assert!(
+            lost_items.is_empty(),
+            "removed must_not_lose must not appear in lost category"
+        );
+
+        let nup_items: Vec<_> = eval
+            .observations
+            .iter()
+            .filter(|o| o.category == RdeCategory::NextUpdatePolicy)
+            .collect();
+        assert!(
+            !nup_items.is_empty(),
+            "removed must_not_lose should appear as review focus in next_update_policy"
+        );
+    }
+
+    // ── Pipeline: empty evidence handled conservatively ─────────────────
+
+    #[test]
+    fn pipeline_handles_empty_evidence_conservatively() {
+        // Both source and target are empty → no structured evidence at all
+        let source = RdeContextBundle::new(subject("s/pipeline-empty"));
+        let target = RdeContextBundle::new(subject("s/pipeline-empty"));
+
+        let eval = run_pipeline(&source, &target);
+
+        // Should not panic, and should produce some observation
+        assert!(!eval.observations.is_empty());
+
+        // All observations with empty evidence should have confidence notes
+        let items_without_evidence: Vec<_> = eval
+            .observations
+            .iter()
+            .filter(|o| o.evidence_refs.is_empty())
+            .collect();
+        for item in &items_without_evidence {
+            assert!(
+                item.confidence_note.is_some(),
+                "items without evidence must have confidence_note"
+            );
+        }
+
+        // No approval/rejection/safety verdicts
+        let text = all_text(&eval);
+        let forbidden = ["approved", "rejected", "safe", "dangerous", "loss"];
+        for word in forbidden {
+            assert!(!text.to_lowercase().contains(word));
+        }
+    }
+
+    // ── Pipeline: no SLS-4 shortcut mapping ─────────────────────────────
+
+    #[test]
+    fn pipeline_does_not_shortcut_sls4_mapping() {
+        // Source has intent + constraint; target has different intent, new risk, removed constraint
+        let source = context_with_intent("s/pipeline-shortcut", "Keep API stable");
+        let target = context_with_intent("s/pipeline-shortcut", "Add caching layer");
+
+        let eval = run_pipeline(&source, &target);
+
+        // Transformed → should be in transformed, NOT deviation_risk
+        let transformed_items: Vec<_> = eval
+            .observations
+            .iter()
+            .filter(|o| o.category == RdeCategory::Transformed)
+            .collect();
+        for item in &transformed_items {
+            let text = format!(
+                "{} {}",
+                item.summary,
+                item.confidence_note.as_deref().unwrap_or("")
+            );
+            assert!(
+                !text.to_lowercase().contains("dangerous"),
+                "transformed must not be labeled dangerous"
+            );
+            assert!(
+                !text.to_lowercase().contains("deviation"),
+                "transformed must not be shortcut to deviation"
+            );
+        }
+
+        // Complemented items → should NOT assert value
+        let complemented_items: Vec<_> = eval
+            .observations
+            .iter()
+            .filter(|o| o.category == RdeCategory::Complemented)
+            .collect();
+        for item in &complemented_items {
+            assert!(
+                !item.summary.to_lowercase().contains("valuable"),
+                "complemented must not assert value"
+            );
+            assert!(
+                !item.summary.to_lowercase().contains("good"),
+                "complemented must not assert goodness"
+            );
+        }
+
+        // Output must validate against SLS-4
+        assert!(eval.validate(true).unwrap().is_empty());
+    }
+
+    // ── Pipeline: Phase D output is review focus, not judgment ─────────
+
+    #[test]
+    fn pipeline_output_is_review_focus_not_judgment() {
+        // source has must_not_lose items, target drops one → generates Removed → NextUpdatePolicy
+        let source = context_with_must_not_lose(
+            "s/pipeline-review",
+            &[
+                "backward compatibility with v1 clients",
+                "error message format",
+            ],
+        );
+        let target = context_with_must_not_lose(
+            "s/pipeline-review",
+            &["backward compatibility with v1 clients"],
+        );
+
+        let eval = run_pipeline(&source, &target);
+
+        // The output must be valid SLS-4
+        assert!(eval.validate(true).unwrap().is_empty());
+
+        // The classifier output must not pretend to be final
+        let text = all_text(&eval);
+        assert!(
+            !text.to_lowercase().contains("final") || text.to_lowercase().contains("not final"),
+            "classifier output must not claim finality"
+        );
+
+        // next_update_policy must exist as review focus handoff to human review
+        let has_nup = eval
+            .observations
+            .iter()
+            .any(|o| o.category == RdeCategory::NextUpdatePolicy);
+        assert!(
+            has_nup,
+            "pipeline must include next_update_policy for human review handoff"
+        );
+    }
 }

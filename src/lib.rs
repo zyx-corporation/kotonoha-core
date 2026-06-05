@@ -18,6 +18,7 @@ pub mod rde_classifier;
 pub mod rde_delta;
 pub mod rde_evidence;
 pub mod rde_impl;
+pub mod rde_report;
 pub mod rde_semantic;
 pub mod semantic_lineage;
 

@@ -448,7 +448,21 @@ Phase F: Full Pipeline Output → MetaRdeReport
 Human Review: EvidenceBindingReport + MetaRdeReport → approval / rejection / revision
 ```
 
-### Phase G — Model-assisted evaluator adapters
+### Phase G — Combined review report
+
+**Status: markdown report introduced (2026-06-05).**
+
+Delivered:
+
+- `RdeCombinedReviewReport` — integrates `EvidenceBindingReport` + `MetaRdeReport` into a single review artifact.
+- `build_combined_review_report()` — aggregates reviewer focus, unresolved, and next-update policy items.
+- `render_combined_review_markdown()` — generates Markdown with mandatory Non-Judgment Boundary section.
+
+Module: [`src/rde_report.rs`](../src/rde_report.rs).
+
+The combined report is a review artifact, **not** a decision object. It does not carry approval, rejection, or safety verdict fields. The Non-Judgment Boundary section explicitly states this.
+
+### Phase H — Model-assisted evaluator adapters
 
 Add optional adapters outside the core minimum.
 

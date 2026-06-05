@@ -14,6 +14,7 @@ pub mod observation_rde;
 pub mod rde;
 pub mod rde_attach;
 pub mod rde_impl;
+pub mod rde_semantic;
 pub mod semantic_lineage;
 
 #[cfg(feature = "postgres")]

@@ -8,7 +8,7 @@ This document maps **`kotonoha-core`** Rust modules to [`kotonoha-spec`](https:/
 | [`SLS-3 Semantic lineage model`](https://github.com/zyx-corporation/kotonoha-spec/blob/main/docs/semantic-lineage-model.md) | [`src/lineage.rs`](../src/lineage.rs) — `LineageUnit` (serde **`deny_unknown_fields`**: only `id`, `prior_unit_id` in interchange JSON). |
 | [`SLS-4 RDE review output`](https://github.com/zyx-corporation/kotonoha-spec/blob/main/docs/rde-review-output.md) | [`src/rde.rs`](../src/rde.rs) — `validate_json`. |
 | [`SLS-9 Phase 2 validation profile`](https://github.com/zyx-corporation/kotonoha-spec/blob/main/docs/phase2-interchange-hardening.md) | [`src/rde.rs`](../src/rde.rs) — closed `source_context_status` vocabulary when present; schema: [`rde-review-output.phase2.schema.json`](https://github.com/zyx-corporation/kotonoha-spec/blob/main/schemas/rde-review-output.phase2.schema.json). Nested `spec_version` remains `0.1`. |
-| [`SLS-5 RDE implementation specification`](https://github.com/zyx-corporation/kotonoha-spec/blob/main/docs/rde-implementation-specification.md) | [`src/rde_impl.rs`](../src/rde_impl.rs) — `RdeSubject`, `RdeContext`, `RdeEvaluator`, `ConservativeRdeEvaluator`, `RdeEvaluation`, `RdeTraceability`. |
+| [`SLS-5 RDE implementation specification`](https://github.com/zyx-corporation/kotonoha-spec/blob/main/docs/rde-implementation-specification.md) | [`src/rde_impl.rs`](../src/rde_impl.rs) — `RdeSubject`, `RdeContext`, `RdeEvaluator`, `ConservativeRdeEvaluator`, `RdeEvaluation`, `RdeTraceability`. Semantic extraction scaffold (Phase B): [`src/rde_semantic.rs`](../src/rde_semantic.rs) — `RdeContextBundle`, `SemanticElementKind`, `SemanticElement`, `SemanticExtraction`, `SemanticExtractor`, `ConservativeSemanticExtractor`. |
 | [`SLS-6 Representation of loss`](https://github.com/zyx-corporation/kotonoha-spec/blob/main/docs/representation-of-loss.md) | Enforced indirectly via RDE `lost` category validation in `rde.rs`; conservative implementation scaffold can emit `RdeCategory::Lost` in `rde_impl.rs`. |
 | [`SLS-7 Relationship to audit trails`](https://github.com/zyx-corporation/kotonoha-spec/blob/main/docs/audit-trail-relationship.md) | [`src/rde_impl.rs`](../src/rde_impl.rs) — `RdeTraceability.audit_correlation_id`; [`src/store/postgres.rs`](../src/store/postgres.rs) under optional `postgres` feature. |
 | [`SLS-8 Versioning`](https://github.com/zyx-corporation/kotonoha-spec/blob/main/docs/versioning.md) | README / changelog / this traceability file should update when section identifiers or obligations move. |
@@ -29,6 +29,8 @@ This document maps **`kotonoha-core`** Rust modules to [`kotonoha-spec`](https:/
 | `SLS-5.8` Audit correlation | `audit_correlation_id` | Correlation only, not approval. |
 | `SLS-5.9` Human authority boundary | Module docs and `NextUpdatePolicy` observation | Output requires human confirmation before approval/publication. |
 | `SLS-5.10` Policy/safety boundary | Module docs | RDE output is not enforcement/refusal/access control. |
+| `SLS-5.3.3` Context assembly (Phase B) | `RdeContextBundle` | Bundled human-supplied context (intent, non-goals, must-not-lose, spec refs, prior RDE, audit refs, review notes). |
+| `SLS-5.4.3` Semantic observation (Phase B) | `SemanticElementKind`, `SemanticElement`, `SemanticExtraction`, `SemanticExtractor` | Structural scaffolding for meaning-bearing element extraction; `ConservativeSemanticExtractor` as initial deterministic implementation. |
 
 ## Phase 2 minimal scope (this repository)
 

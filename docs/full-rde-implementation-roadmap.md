@@ -406,11 +406,17 @@ Mapping policy (conservative):
 
 ### Phase E — Evidence binder
 
-**Status: design gate introduced (2026-06-05) — implementation not started.**
+**Status: minimal structs introduced (2026-06-05).**
 
 Design gate: [`docs/evidence-binder-design.md`](evidence-binder-design.md).
 
-Phase E introduces `EvidenceBinder` as the layer that binds evidence references, source spans, and uncertainty notes to RDE classification items **after** classification and **before** human review.
+Delivered:
+
+- `EvidenceRef`, `EvidenceRole`, `TextSpan` — typed evidence reference structures.
+- `EvidenceBinding`, `EvidenceBindingReport` — binding containers.
+- `bind_evidence_minimal()` — minimal evidence binding preserving classification without reclassifying.
+
+Module: [`src/rde_evidence.rs`](../src/rde_evidence.rs).
 
 Pipeline position:
 
@@ -420,20 +426,19 @@ Phase E: RdeEvaluation × Source Context → EvidenceBindingReport
 Human Review: EvidenceBindingReport → approval / rejection / revision
 ```
 
-Future implementation candidates:
-
-- `EvidenceRef`, `EvidenceRole`, `TextSpan`
-- `EvidenceBinding`, `EvidenceBindingReport`
-- evidence binding from `RdeEvaluation` × source context
-- Markdown / JSON report connectivity
-
 ### Phase F — Meta-RDE
 
-**Status: design gate introduced (2026-06-05) — implementation not started.**
+**Status: minimal structs introduced (2026-06-05).**
 
 Design gate: [`docs/meta-rde-design.md`](meta-rde-design.md).
 
-Phase F introduces `MetaRDE` as a recursive audit layer that inspects the full RDE pipeline output for drift from its design boundaries. It does **not** reclassify, approve, or reject.
+Delivered:
+
+- `MetaRdeSeverity`, `PipelinePhase` — typed severity and phase enums.
+- `MetaRdeFinding`, `MetaRdeReport` — finding and report containers.
+- `run_meta_rde_minimal()` — minimal audit inspecting `EvidenceBindingReport` for missing evidence and uncertainty.
+
+Module: [`src/meta_rde.rs`](../src/meta_rde.rs).
 
 Pipeline position:
 
@@ -442,13 +447,6 @@ Phase E: RdeEvaluation × Source Context → EvidenceBindingReport
 Phase F: Full Pipeline Output → MetaRdeReport
 Human Review: EvidenceBindingReport + MetaRdeReport → approval / rejection / revision
 ```
-
-Future implementation candidates:
-
-- `MetaRdeReport`, `MetaRdeFinding`, `MetaRdeSeverity`
-- detection of classifier boundary drift
-- detection of evidence binder judgment drift
-- suspicious drift / critical distortion audit
 
 ### Phase G — Model-assisted evaluator adapters
 

@@ -13,6 +13,7 @@ pub mod lineage;
 pub mod observation_rde;
 pub mod rde;
 pub mod rde_attach;
+pub mod rde_classifier;
 pub mod rde_delta;
 pub mod rde_impl;
 pub mod rde_semantic;

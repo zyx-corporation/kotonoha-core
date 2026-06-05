@@ -32,6 +32,7 @@ This document maps **`kotonoha-core`** Rust modules to [`kotonoha-spec`](https:/
 | `SLS-5.3.3` Context assembly (Phase B) | `RdeContextBundle` | Bundled human-supplied context (intent, non-goals, must-not-lose, spec refs, prior RDE, audit refs, review notes). |
 | `SLS-5.4.3` Semantic observation (Phase B) | `SemanticElementKind`, `SemanticElement`, `SemanticExtraction`, `SemanticExtractor` | Structural scaffolding for meaning-bearing element extraction; `ConservativeSemanticExtractor` as initial deterministic implementation. |
 | `SLS-5.4.3` ΔM analysis (Phase C) | `DeltaMRelationKind`, `DeltaMRelation`, `DeltaMReport`, `DeltaMAnalyzer`, `ConservativeDeltaMAnalyzer` | Structural ΔM relation layer that compares two `SemanticExtraction` objects. Not yet SLS-4 category classification (Phase D). [`src/rde_delta.rs`](../src/rde_delta.rs). |
+| `SLS-5.4.4` RDE classification (Phase D) | `rde-phase-d-classifier-design-gate.md` | **Design gate only** — non-normative design guidance for classifier implementation. No code yet. [`docs/rde-phase-d-classifier-design-gate.md`](rde-phase-d-classifier-design-gate.md). |
 
 ## Phase 2 minimal scope (this repository)
 

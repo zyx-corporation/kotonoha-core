@@ -355,17 +355,26 @@ This is not "semantic understanding complete." It is the structural scaffolding 
 
 ### Phase C — ΔM report model
 
-Add:
+**Status: scaffold introduced (2026-06-05).**
 
-- `DeltaMRelationKind`
-- `DeltaMRelation`
-- `DeltaMReport`
-- simple matcher for exact/near-exact preservation and obvious loss
+Delivered:
 
-Candidate issue:
+- `DeltaMRelationKind` — `Preserved`, `Transformed`, `Complemented`, `Weakened`, `Removed`, `Split`, `Merged`, `Contradicted`, `Unresolved`.
+- `DeltaMRelation` — typed container with `source_element_id`, `target_element_id`, `relation`, `summary`, `evidence_refs`.
+- `DeltaMReport` — collection of `DeltaMRelation` per subject.
+- `DeltaMAnalyzer` trait — extensible boundary for rule-based, model-assisted, and human-curated analyzers.
+- `ConservativeDeltaMAnalyzer` — deterministic, id-based matcher that compares `SemanticExtraction` objects using id/kind/text rules.
+
+Module: [`src/rde_delta.rs`](../src/rde_delta.rs).
+
+This is **not** full semantic ΔM analysis. `Weakened`, `Split`, `Merged`, `Contradicted`, and `Unresolved` are enum variants reserved for future analyzers. The conservative analyzer only generates `Preserved`, `Transformed`, `Removed`, and `Complemented` from deterministic id-based comparison.
+
+Pipeline position:
 
 ```text
-impl: add DeltaM report model and conservative analyzer
+Phase B: RdeContextBundle → SemanticExtraction
+Phase C: SemanticExtraction × SemanticExtraction → DeltaMReport
+Phase D: DeltaMReport → RdeEvaluation / SLS-4 categories
 ```
 
 ### Phase D — RDE classifier pipeline

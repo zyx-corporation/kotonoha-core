@@ -379,18 +379,27 @@ Phase D: DeltaMReport → RdeEvaluation / SLS-4 categories
 
 ### Phase D — RDE classifier pipeline
 
-Add:
+**Status: design gate introduced (2026-06-05) — implementation not started.**
 
-- `RdeClassifier`
+Phase D is the first layer that maps `DeltaMReport` into SLS-4 RDE categories. This is a higher-risk transition than Phase B or Phase C because it approaches normative RDE output.
+
+Design gate: [`docs/rde-phase-d-classifier-design-gate.md`](rde-phase-d-classifier-design-gate.md).
+
+Prohibited shortcuts:
+
+- Mechanical `Removed` → `lost` mapping.
+- Mechanical `Transformed` → `deviation_risk` mapping.
+- Treating `Complemented` as a good addition.
+- Classifier returning approval/rejection/safety verdicts.
+- Producing judgment without evidence or uncertainty notes.
+
+Future implementation candidates:
+
+- `RdeClassifier` trait
+- `ConservativeRdeClassifier`
 - classifier from `DeltaMReport` to `RdeEvaluation`
 - category-specific tests
 - evidence propagation
-
-Candidate issue:
-
-```text
-impl: add RDE classifier from DeltaM report
-```
 
 ### Phase E — Evidence and traceability expansion
 

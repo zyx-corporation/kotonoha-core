@@ -33,6 +33,7 @@ This document maps **`kotonoha-core`** Rust modules to [`kotonoha-spec`](https:/
 | `SLS-5.4.3` Semantic observation (Phase B) | `SemanticElementKind`, `SemanticElement`, `SemanticExtraction`, `SemanticExtractor` | Structural scaffolding for meaning-bearing element extraction; `ConservativeSemanticExtractor` as initial deterministic implementation. |
 | `SLS-5.4.3` ΔM analysis (Phase C) | `DeltaMRelationKind`, `DeltaMRelation`, `DeltaMReport`, `DeltaMAnalyzer`, `ConservativeDeltaMAnalyzer` | Structural ΔM relation layer that compares two `SemanticExtraction` objects. Not yet SLS-4 category classification (Phase D). [`src/rde_delta.rs`](../src/rde_delta.rs). |
 | `SLS-5.4.4` RDE classification (Phase D) | `RdeClassifier`, `ConservativeRdeClassifier` | Conservative classifier scaffold that maps `DeltaMReport` into `RdeEvaluation` / SLS-4 categories. Review focus only; not final judgment. [`src/rde_classifier.rs`](../src/rde_classifier.rs). Design gate: [`docs/rde-phase-d-classifier-design-gate.md`](rde-phase-d-classifier-design-gate.md). |
+| `SLS-5.4.5` Evidence binding (Phase E) | `evidence-binder-design.md` | **Design gate only** — binds evidence references and uncertainty notes to RDE classification items. After classification, before human review. [`docs/evidence-binder-design.md`](evidence-binder-design.md). |
 
 ## Phase 2 minimal scope (this repository)
 

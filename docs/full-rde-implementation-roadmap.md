@@ -403,23 +403,29 @@ Mapping policy (conservative):
 | `Contradicted` / `Weakened` | `next_update_policy` | **Not** `deviation_risk`. |
 | `Unresolved` | `next_update_policy` | **Not** automatically `intentionally_unresolved`. |
 | `Split` / `Merged` | `transformed` | With uncertainty note. |
-- evidence propagation
 
-### Phase E — Evidence and traceability expansion
+### Phase E — Evidence binder
 
-Add:
+**Status: design gate introduced (2026-06-05) — implementation not started.**
 
-- `EvidenceRef`
-- source span support
-- spec section references
-- prior RDE references
-- audit correlation expansion
+Design gate: [`docs/evidence-binder-design.md`](evidence-binder-design.md).
 
-Candidate issue:
+Phase E introduces `EvidenceBinder` as the layer that binds evidence references, source spans, and uncertainty notes to RDE classification items **after** classification and **before** human review.
+
+Pipeline position:
 
 ```text
-impl: add evidence references and traceability enrichment
+Phase D: DeltaMReport → RdeEvaluation / SLS-4
+Phase E: RdeEvaluation × Source Context → EvidenceBindingReport
+Human Review: EvidenceBindingReport → approval / rejection / revision
 ```
+
+Future implementation candidates:
+
+- `EvidenceRef`, `EvidenceRole`, `TextSpan`
+- `EvidenceBinding`, `EvidenceBindingReport`
+- evidence binding from `RdeEvaluation` × source context
+- Markdown / JSON report connectivity
 
 ### Phase F — Model-assisted evaluator adapters
 

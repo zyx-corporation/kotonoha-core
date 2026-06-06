@@ -462,7 +462,28 @@ Module: [`src/rde_report.rs`](../src/rde_report.rs).
 
 The combined report is a review artifact, **not** a decision object. It does not carry approval, rejection, or safety verdict fields. The Non-Judgment Boundary section explicitly states this.
 
-### Phase H — Model-assisted evaluator adapters
+### Phase H — Human Review Decision Model
+
+**Status: design gate introduced (2026-06-06) — implementation not started.**
+
+Design gate: [`docs/human-review-decision-model.md`](human-review-decision-model.md).
+
+Phase H is the first layer that may express `approve`, `reject`, `request revision`, or `defer`. However, the decision belongs to the human reviewer. Phase H is an external audit record, not an automatic decision engine.
+
+Pipeline position:
+
+```text
+Phase G: EvidenceBindingReport + MetaRdeReport → Combined Review Report
+Phase H: Combined Review Report + Reviewer → HumanReviewDecision
+```
+
+Future implementation candidates:
+
+- `HumanReviewDecision`, `HumanReviewDecisionKind`
+- `HumanReviewReason`, `HumanReviewAction`
+- decision recording from Combined Review Report
+
+### Phase I — Model-assisted evaluator adapters
 
 Add optional adapters outside the core minimum.
 

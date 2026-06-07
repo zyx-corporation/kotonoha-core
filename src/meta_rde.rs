@@ -199,9 +199,7 @@ pub fn run_meta_rde_minimal(evidence_report: &EvidenceBindingReport) -> MetaRdeR
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::rde_evidence::{
-        bind_evidence_minimal, EvidenceBindingReport,
-    };
+    use crate::rde_evidence::{bind_evidence_minimal, EvidenceBindingReport};
     use crate::rde_impl::{RdeCategory, RdeEvaluation, RdeObservation};
 
     // ── helpers ──────────────────────────────────────────────────────────

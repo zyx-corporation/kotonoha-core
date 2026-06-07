@@ -8,6 +8,7 @@ pub const TARGET_SPEC_BUNDLE: &str = "0.1";
 
 pub mod context_pack;
 pub mod git;
+pub mod human_review;
 pub mod interchange;
 pub mod lineage;
 pub mod meta_rde;

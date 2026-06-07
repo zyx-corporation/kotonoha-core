@@ -464,24 +464,20 @@ The combined report is a review artifact, **not** a decision object. It does not
 
 ### Phase H — Human Review Decision Model
 
-**Status: design gate introduced (2026-06-06) — implementation not started.**
+**Status: minimal structs introduced (2026-06-07).**
 
 Design gate: [`docs/human-review-decision-model.md`](human-review-decision-model.md).
 
-Phase H is the first layer that may express `approve`, `reject`, `request revision`, or `defer`. However, the decision belongs to the human reviewer. Phase H is an external audit record, not an automatic decision engine.
+Delivered:
 
-Pipeline position:
+- `HumanReviewDecision`, `HumanReviewDecisionKind` — decision record and category enum.
+- `HumanReviewReason`, `HumanReviewAction`, `HumanReviewActionKind` — reason and action types.
+- `HumanReviewDecisionError` — validation error enum.
+- `create_human_review_decision()` — validated constructor (Approve/Reject require reasons; reviewer_id required; empty summaries rejected).
 
-```text
-Phase G: EvidenceBindingReport + MetaRdeReport → Combined Review Report
-Phase H: Combined Review Report + Reviewer → HumanReviewDecision
-```
+Module: [`src/human_review.rs`](../src/human_review.rs).
 
-Future implementation candidates:
-
-- `HumanReviewDecision`, `HumanReviewDecisionKind`
-- `HumanReviewReason`, `HumanReviewAction`
-- decision recording from Combined Review Report
+The decision is an external audit record. It references a Combined Review Report by `report_id` but does not modify any RDE pipeline output.
 
 ### Phase I — Model-assisted evaluator adapters
 
